@@ -1,6 +1,5 @@
 const Automerge = require("automerge");
 const io = require("socket.io-client");
-const Connection = require("./server-connection");
 const Buffer = require("buffer");
 const socket = io();
 
@@ -14,34 +13,74 @@ docSet.setDoc("example", initDoc);
 console.log("docSet:", docSet);
 
 //console.log the doc whenever it changes
+//Whenever there is a change in the document, we want to send it to the server.
 docSet.registerHandler((docId, doc) => {
     console.log(`[${ docId }] ${ JSON.stringify(doc) }`);
-})
-
-let connection = new Connection(docSet, socket);
-console.log("Socket: ", socket);
-
-console.log("Trying to connect");
-//Connect to the port
-socket.connect(PORT, HOST, () => {
-  console.log(`${HOST}:${PORT} connected`);
-})
-
-socket.on("connect", () => {
-  console.log(`Connected to ${PORT}:${HOST}`)
-})
-
-//Recieving data from the server
-socket.on("data", data => {
-    if (!(data instanceof Buffer.Buffer)) {
-        data = Buffer.Buffer.from(data, 'utf8');
+    //If we have the example document, we want to emit the data.
+    if ( docId === "example" ) {   
+        //This emits an event that we can respond to on the server,
+        //sending with it the new document
+        socket.emit("client-new-doc", JSON.stringify( doc ))
     }
-    connection.recieveData( data );
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//console.log("Socket: ", socket);
+
+//console.log("Trying to connect");
+////Connect to the port
+//socket.connect(PORT, HOST, () => {
+  //console.log(`${HOST}:${PORT} connected`);
+//})
+
+//socket.on("connect", () => {
+  //console.log(`Connected to ${PORT}:${HOST}`)
+//})
+
+////Recieving data from the server
+//socket.on("data", data => {
+    //if (!(data instanceof Buffer.Buffer)) {
+        //data = Buffer.Buffer.from(data, 'utf8');
+    //}
+    //connection.recieveData( data );
+//})
 
 setInterval(() => {
-    let doc = docSet.getDoc("example");
-    console.log(doc.serverNum);
+    let currentDoc = docSet.getDoc("example");
+    let newDoc = Automerge.change( currentDoc, doc => {
+        if (doc.serverNum) doc.serverNum++;
+        else doc.serverNum = 1;
+    } );
+    docSet.setDoc("example", newDoc);
 }, 1000)
 
 // setInterval(() => {

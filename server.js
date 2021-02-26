@@ -1,8 +1,5 @@
 const express = require("express");
-
-const Connection = require("./server-connection");
-
-//Making a simple express server
+//Making a simple express server 
 
 const SERVER_PORT = 3000;
 
@@ -30,57 +27,33 @@ docSet.registerHandler((docId, doc) => {
     console.log(`[${ docId }]: ${ doc.serverNum | "No server number" }`)
 });
 
-// setInterval(() => { //Increments a counter every 3 seconds
-//     let doc = docSet.getDoc("example");
-//     doc = Automerge.change( doc, doc => {
-//         doc.serverNum = ( doc.serverNum | 0 ) + 1
-//     });
-//     docSet.setDoc("example", doc);
-// }, 3000 );
+//setInterval(() => { //Increments a counter every 3 seconds
+    //let doc = docSet.getDoc("example");
+    //let newDoc = Automerge.change( doc, doc => {
+        //doc.serverNum = ( doc.serverNum | 0 ) + 1
+    //});
+    //let changes = Automerge.getChanges( doc, newDoc );
+    //docSet.setDoc("example", newDoc);
+//}, 5000 );
 
 //When something connects
 const handler = socket => {
 
-    console.log( socket.client.id )
-    
-    console.log(`[${ socket.remoteAddress }: ${ socket.remotePort }] connected`)
-    
-    const connection = new Connection( docSet, socket );
+    console.log( socket.client.id + "connected!" )
+    //We've connected to a socket!
+    //Time to listen for some events...
 
-    //When recieving data from the client
-    socket.on('data', data => {
-        if (!( data instanceof Buffer )) {
-            data = Buffer.from( data, 'utf8' );
-        }
-        
-        connection.recieveData( data );
-
-    })
-
-    //On close
-    socket.on( 'close', data => {
-        console.log(`[${ socket.remoteAddress }: ${ socket.remotePort }] closed`);
-        connection.close();
-    } )
-
-    //On error
-    socket.on('error', error => {
-        console.log(`[${ socket.remoteAddress }: ${ socket.remotePort }] error: ${ error }`)
+    socket.on("client-new-doc", data => {
+        //We got the new document!
+        //Let's look at it...
+        console.log( "Client data:", data );
     })
 }
-
-// app.use('/server', (req, res) => {
-//     handler( req.socket );
-// })
-
+    
 io.sockets.on("connect", handler);
-
-// app.listen(SERVER_PORT, () => {
-//     console.log(`Server listening on port ${ SERVER_PORT }`);
-// })
 
 //Correct server setup
 
 server.listen( SERVER_PORT, () => {
-    console.log(`http server listening on port ${ SERVER_PORT }`)
-} );
+    console.log(`http server listening on port ${ SERVER_PORT }`);
+} )

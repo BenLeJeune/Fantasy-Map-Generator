@@ -1,4 +1,4 @@
-const Automerge = require("automerge");
+const Automerge = require("automerge"); 
 
 //from the automerge-net github repo mostly
 
@@ -32,20 +32,20 @@ class Connection {
     }
 
     sendMsg = msg => {
-        if (!this.socket) return;
+        if (!this.socket) return; //We would like a socket please
 
-        console.log("Sending message...");
+        console.log("Sending message:", msg);
 
         const data = Buffer.from(JSON.stringify(msg), 'utf8');
-        const header = Buffer.alloc(4);
 
-        header.writeInt32BE(data.length, 0);
+        // const header = Buffer.alloc(4);
 
-        this.socket.write(header);
-        this.socket.write(data);
+        // header.writeInt32BE(data.length, 0);
 
-        this.socket.emit("data", { data: "cool-data" });
+        // this.socket.write(header);
+        // this.socket.write(data);
 
+        this.socket.emit("data", data);
     }
 
     close = () => { //Closes the connection
