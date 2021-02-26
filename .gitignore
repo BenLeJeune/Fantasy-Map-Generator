@@ -1,2 +1,4 @@
 run_php_server.bat
 .vscode
+\node_modules
+.github
