@@ -1,4 +1,5 @@
 "use strict";
+
 function editBurg(id) {
   if (customization) return;
   closeDialogs(".stable");
@@ -474,6 +475,9 @@ function editBurg(id) {
     document.getElementById("burgRelocate").classList.remove("pressed");
     burgLabels.selectAll("text").call(d3.drag().on("drag", null)).classed("draggable", false);
     unselect();
+
+    syncFunc.TriggerChange();
+
   }
 
 }
