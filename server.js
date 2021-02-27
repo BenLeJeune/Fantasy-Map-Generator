@@ -16,7 +16,11 @@ app.get("/", (req, res) => {
 const Automerge = require("automerge");
 
 const docSet = new Automerge.DocSet();
-const initDoc = Automerge.from({ serverNum: new Automerge.Counter() });
+const emptyDoc = Automerge.init();
+const initDoc = Automerge.change( emptyDoc, "Initial state", doc => {
+    doc.serverNum = new Automerge.Counter();
+});
+
 
 docSet.setDoc( "example", initDoc );
 
@@ -70,7 +74,8 @@ const handler = socket => {
             changes: JSON.stringify(changes),
             client_id: data.client_id
         };
-        socket.emit("server-new-changes", emitData );
+        //Broadcast.emit sends to everyone EXCEPT FOR the client that sent it
+        socket.broadcast.emit("server-new-changes", emitData );
 
         console.log(doc.serverNum, newDoc.serverNum);
     })

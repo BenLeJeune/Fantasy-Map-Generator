@@ -40,11 +40,13 @@ console.log("docSet:", docSet);
 
 function updateDocument( description, updateCallback ) {
     //We want to make changes in the same place that we send the changes to the server
-    console.log(`Getting changes`);
+    
     const currentDoc = docSet.getDoc("example");
+    console.log(`serverNum before internal update: `, currentDoc.serverNum.value);
+
     if ( currentDoc ) {
         const newDoc = Automerge.change(currentDoc, description, updateCallback);
-
+        console.log("internal newDoc serverNum: ", newDoc.serverNum.value)
         //Get the changes
         const changes = Automerge.getChanges(currentDoc, newDoc);
 
@@ -53,9 +55,9 @@ function updateDocument( description, updateCallback ) {
 
         const emitData = {
             changes: JSON.stringify(changes),
-            client_idi: socket.id
+            client_id: socket.id
         }
-        console.log("sending new doc to server: ", newDoc)
+        console.log("sending new doc to server: ", newDoc.serverNum.value);
 
         socket.emit("client-new-changes", emitData)
 
@@ -67,19 +69,22 @@ function updateDocument( description, updateCallback ) {
 //As currently setup, should (?) bounce infinitely
 
 socket.on("server-new-changes", data => {
-    console.log("Recieving data from the server!");
-    console.log( data );
-    const changes = data.changes;
-    const client_id = data.client_id;
-    const parsedChanges = JSON.parse(changes); //parses the change data
 
-    if (client_id === socket.id ) {
+    console.log("server-new-changes event");
+
+    const changes = JSON.parse(data.changes);
+    const client_id = data.client_id;
+
+    console.log(client_id, socket.id);
+
+    if ( client_id === socket.id ) {
         console.log("These are changes from us - don't worry");
     } else {
         //We want to apply the changes we get from the server
         const currentDoc = docSet.getDoc("example");
+        console.log("Applying changes from server: ", changes);
         const newDoc = Automerge.applyChanges(currentDoc, changes);
-
+        console.log("Server response gives serverNum at ", newDoc.serverNum.value)
         docSet.setDoc("example", newDoc);
     }
 })
@@ -91,6 +96,7 @@ socket.on("server-set-initial-state", data => {
     //We apply this to a fresh node
     const freshDoc = Automerge.applyChanges(Automerge.init(), changes);
     //Now, set this as the state
+    console.log("Initial state has serverNum at ", freshDoc.serverNum.value);
     docSet.setDoc("example", freshDoc);
 })
 
@@ -149,7 +155,7 @@ setInterval(() => {
     updateDocument( doc => {
         doc.serverNum.increment();
     } )
-}, 2000)
+}, 5000)
 
 // setInterval(() => {
 //     let doc = docSet.getDoc('example')
@@ -164,16 +170,10 @@ setInterval(() => {
 const syncFunc = {
     TriggerChange: () => {
         //Whenever we do this, let's increment the state by 1 because why not.
-        console.log("Reached triggerChange()");
-        let currentDoc = docSet.getDoc("example");
-        console.log("Got the doc!");
 
         updateDocument("Making a bigger increment!", doc => {
             doc.serverNum.increment(5);
         });
-
-        console.log("Setting the doc!");
-        docSet.setDoc("example", newDoc);
     }
 };
 
