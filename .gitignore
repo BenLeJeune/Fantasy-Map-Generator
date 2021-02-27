@@ -4,3 +4,4 @@ run_php_server.bat
 .github
 
 \public\bundle.js
+bundle.js

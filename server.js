@@ -2,9 +2,7 @@ const express = require("express");
 //Making a simple express server 
 
 const SERVER_PORT = 3000;
-
 const app = express();
-
 const server = require("http").createServer( app );
 const io = require("socket.io")(server);
 
@@ -18,7 +16,7 @@ app.get("/", (req, res) => {
 const Automerge = require("automerge");
 
 const docSet = new Automerge.DocSet();
-const initDoc = Automerge.change(Automerge.init(), doc => doc.hello = "hi");
+const initDoc = Automerge.from({ serverNum: new Automerge.Counter() });
 
 docSet.setDoc( "example", initDoc );
 
@@ -36,17 +34,45 @@ docSet.registerHandler((docId, doc) => {
     //docSet.setDoc("example", newDoc);
 //}, 5000 );
 
+
 //When something connects
 const handler = socket => {
 
+    let doc = docSet.getDoc("example");
+    
     console.log( socket.client.id + "connected!" )
     //We've connected to a socket!
+    
+    //We want to send this socket the changes so they can make their doc.
+    const initChanges = Automerge.getAllChanges( doc );
+    const emitData = { initChanges }
+    socket.emit("server-set-initial-state", emitData);    
+
     //Time to listen for some events...
 
-    socket.on("client-new-doc", data => {
+
+    socket.on("client-new-changes", data => {
         //We got the new document!
         //Let's look at it...
-        console.log( "Client data:", data );
+
+        let doc = docSet.getDoc("example");
+
+        console.log( "Client sending us changes" );
+        
+        //Now we want to send this out to everyone.
+        const changes = JSON.parse(data.changes);
+        
+        const newDoc = Automerge.applyChanges( doc, changes );
+
+        docSet.setDoc("example", newDoc);
+
+        const emitData = {
+            changes: JSON.stringify(changes),
+            client_id: data.client_id
+        };
+        socket.emit("server-new-changes", emitData );
+
+        console.log(doc.serverNum, newDoc.serverNum);
     })
 }
     
