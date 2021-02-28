@@ -43,7 +43,8 @@ function reGraph( grid, pack ) {
   cells = pack.cells;
   cells.p = newCells.p; // points coordinates [x, y]
   cells.g = grid.cells.i.length < 65535 ? Uint16Array.from(newCells.g) : Uint32Array.from(newCells.g); // reference to initial grid cell
-  cells.q = d3.quadtree(cells.p.map((p, d) => [p[0], p[1], d])); // points quadtree for fast search
+  //cells.q = d3.quadtree(cells.p.map((p, d) => [p[0], p[1], d])); // points quadtree for fast search
+  //THIS WILL HAVE TO BE RE-BUILD WHEN THE NEW DATA IS RECIEVED
   cells.h = new Uint8Array(newCells.h); // heights
   cells.area = new Uint16Array(cells.i.length); // cell area
   cells.i.forEach(i => cells.area[i] = Math.abs(d3.polygonArea(getPackPolygon(i, pack))));

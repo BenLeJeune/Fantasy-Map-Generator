@@ -1,6 +1,8 @@
 const express = require("express");
 //Making a simple express server 
 
+const loadFromMapFile = require("./loadFromMapFile");
+
 const SERVER_PORT = 3000;
 const app = express();
 const server = require("http").createServer( app );
@@ -23,22 +25,17 @@ const initDoc = Automerge.change( emptyDoc, "Initial state", doc => {
 });
 
 
+//This loads a map from a url and applies it to the document
+const TEST_MAP_URL = "/public/maps/Derevia 2021-02-28-11-43.map"
+const loadedDoc = loadFromMapFile( docSet, "example", TEST_MAP_URL);
+
+
 docSet.setDoc( "example", initDoc );
 
 //Print the document whenever it changes
 docSet.registerHandler((docId, doc) => {
     console.log(`[${ docId }]: ${ doc.serverNum | "No server number" }`)
 });
-
-//setInterval(() => { //Increments a counter every 3 seconds
-    //let doc = docSet.getDoc("example");
-    //let newDoc = Automerge.change( doc, doc => {
-        //doc.serverNum = ( doc.serverNum | 0 ) + 1
-    //});
-    //let changes = Automerge.getChanges( doc, newDoc );
-    //docSet.setDoc("example", newDoc);
-//}, 5000 );
-
 
 //When something connects
 const handler = socket => {
@@ -49,6 +46,7 @@ const handler = socket => {
     //We've connected to a socket!
     
     //We want to send this socket the changes so they can make their doc.
+
     const initChanges = Automerge.getAllChanges( doc );
     const emitData = { initChanges }
     socket.emit("server-set-initial-state", emitData);    
@@ -82,11 +80,7 @@ const handler = socket => {
     })
 }
     
-io.sockets.on("connect", handler);
-
-const loadFromMapFile = require("./loadFromMapFile");
-const TEST_MAP_URL = "/public/maps/Derevia 2021-02-28-11-43.map"
-loadFromMapFile( docSet, "example", TEST_MAP_URL );
+io.sockets.on("connect", handler); 
 
 //Correct server setup
 
