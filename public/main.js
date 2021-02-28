@@ -191,8 +191,8 @@ void function checkLoadParameters() {
 }()
 
 function loadMapFromURL(maplink, random) {
-  const URL = decodeURIComponent(maplink);
-
+  //const URL = decodeURIComponent(maplink);
+  const URL = "http://localhost:3000/public/&maplink=http://localhost:3000/public/maps/Derevia%202021-02-28-11-43.map"
   fetch(URL, {method: 'GET', mode: 'cors'})
     .then(response => {
       if(response.ok) return response.blob();

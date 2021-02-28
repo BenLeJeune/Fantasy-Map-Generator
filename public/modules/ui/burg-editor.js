@@ -251,6 +251,7 @@ function editBurg(id) {
     });
   }
 
+  //ADD FUNCTION HERE
   function changeName() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].name = burgName.value;
@@ -263,11 +264,13 @@ function editBurg(id) {
     changeName();
   }
 
+  //ADD FUNCTION HERE
   function changeType() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].type = this.value;
   }
 
+  //ADD FUNCTION HERE
   function changeCulture() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].culture = +this.value;
@@ -280,6 +283,7 @@ function editBurg(id) {
     changeName();
   }
 
+  //ADD FUNCTION HERE
   function changePopulation() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].population = rn(burgPopulation.value / populationRate.value / urbanization.value, 4);
@@ -393,6 +397,7 @@ function editBurg(id) {
     }
   }
 
+  //ADD FUNCTION HERE
   function relocateBurgOnClick() {
     const cells = pack.cells;
     const point = d3.mouse(this);
@@ -442,12 +447,14 @@ function editBurg(id) {
     if (d3.event.shiftKey === false) toggleRelocateBurg();
   }
 
+  //ADD FUNCTION HERE
   function editBurgLegend() {
     const id = elSelected.attr("data-id");
     const name = elSelected.text();
     editNotes("burg"+id, name);
   }
 
+  //ADD FUNCTION HERE
   function removeSelectedBurg() {
     const id = +elSelected.attr("data-id");
     if (pack.burgs[id].capital) {

@@ -18,7 +18,8 @@ const Automerge = require("automerge");
 const docSet = new Automerge.DocSet();
 const emptyDoc = Automerge.init();
 const initDoc = Automerge.change( emptyDoc, "Initial state", doc => {
-    doc.serverNum = new Automerge.Counter();
+   doc.grid = {};
+   doc.pack = {};  
 });
 
 
@@ -82,6 +83,10 @@ const handler = socket => {
 }
     
 io.sockets.on("connect", handler);
+
+const loadFromMapFile = require("./loadFromMapFile");
+const TEST_MAP_URL = "/public/maps/Derevia 2021-02-28-11-43.map"
+loadFromMapFile( docSet, "example", TEST_MAP_URL );
 
 //Correct server setup
 

@@ -360,6 +360,8 @@ function getMapData() {
       namesData, rivers].join("\r\n");
     const blob = new Blob([data], {type: "text/plain"});
 
+    console.log("DOING THIS THING HERE");
+
     TIME && console.timeEnd("createMapDataBlob");
     resolve(blob);
   });
@@ -573,6 +575,9 @@ function toggleSaveReminder() {
 
 function uploadMap(file, callback) {
   uploadMap.timeStart = performance.now();
+  
+  //STUFF
+  console.log(file);
 
   const fileReader = new FileReader();
   fileReader.onload = function(fileLoadedEvent) {
