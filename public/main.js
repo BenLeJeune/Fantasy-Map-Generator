@@ -238,6 +238,7 @@ function generateMapOnLoad() {
         mapData.set( "grid", grid );
       } else {
         //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
+        console.log("Setting the pack & grid");
         pack = mapData.get("pack");
         grid = mapData.get("grid");
       }

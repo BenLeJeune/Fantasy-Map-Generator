@@ -25,7 +25,8 @@ let onConnected;
 window.changeDoc = ( cb ) => cb( doc );
 window.docExists = () => {
     console.log(`Does this doc exist? `, mapData.toJSON())
-    return mapData.entries.length !== 0
+    console.log( mapData.toJSON() === "{}", mapData.has("pack") );
+    return mapData.has("pack") && mapData.has("grid");
 };
 window.syncedWithServer = wsProvider.synced;
 window.setOnConnect = cb => {
