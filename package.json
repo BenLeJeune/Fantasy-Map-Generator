@@ -1,0 +1,52 @@
+{
+  "name": "bens-fantasy-map-generator",
+  "version": "1.0.0",
+  "description": "Hello! I decided to make a fork of this to use CRDTs to create a version of this that features live editing capabilities, as well as possibly introducing new functionality, who knows.",
+  "main": "server.js",
+  "dependencies": {
+    "backo2": "^1.0.2",
+    "base64-arraybuffer": "^0.2.0",
+    "base64-js": "^1.5.1",
+    "component-emitter": "^1.3.0",
+    "cors": "^2.8.5",
+    "d3": "^6.5.0",
+    "debug": "^4.3.1",
+    "delaunator": "^4.0.1",
+    "engine.io-client": "^4.1.2",
+    "engine.io-parser": "^4.0.2",
+    "express": "^4.17.1",
+    "has-cors": "^1.1.0",
+    "ieee754": "^1.2.1",
+    "ms": "^2.1.3",
+    "object-assign": "^4.1.1",
+    "parseqs": "^0.0.6",
+    "parseuri": "^0.0.6",
+    "read-blob": "^1.1.2",
+    "socket.io": "^3.1.2",
+    "socket.io-client": "^3.1.2",
+    "socket.io-parser": "^4.0.4",
+    "vary": "^1.1.2",
+    "xmlhttprequest-ssl": "^1.6.0",
+    "y-websocket": "^1.3.11",
+    "yeast": "^0.1.2",
+    "yjs": "^13.5.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benlejeune/fantasy-map-generator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/benlejeune/fantasy-map-generator/issues"
+  },
+  "homepage": "https://github.com/benlejeune/fantasy-map-generator#readme"
+}

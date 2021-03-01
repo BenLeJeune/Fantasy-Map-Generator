@@ -5,6 +5,8 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
+window.someFunc();
+
 // Switches to disable/enable logging features
 const PRODUCTION = window.location.host;
 const INFO = !PRODUCTION;
