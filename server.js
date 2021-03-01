@@ -22,16 +22,6 @@ wss.on('connection', setupWSConnection);
 
 //Gets the map data
 const MAP_URL = __dirname + "/public/maps/Ortia 2021-03-01-13-14.map";
-const mapData = loadFromMapFile(MAP_URL).then(() => console.log("Loaded map!"));
-
-wss.on( "client-request-initial-state", () => {
-  if (!mapData) { //MAPDATA NOT LOADED
-    console.log("Mapdata not yet loaded");
-  } else {
-    //MAPDATA IS LOADED
-    console.log("Mapdata is loaded");
-  }''
-} )
 
 server.on('upgrade', (request, socket, head) => {
   // You may check auth of request here..

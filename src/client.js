@@ -1,7 +1,12 @@
 import * as Y from "yjs";
-import { WebsocketProvider, WebSocketProvider } from "y-websocket";
-
+import { WebsocketProvider } from "y-websocket";
 const doc = new Y.Doc();
+const mapData = doc.getMap("mapData");
+
+mapData.observe(() => {
+    console.log(`Mapdata changed: `, mapData.toJSON())
+})
+
 const wsProvider = new WebsocketProvider(
     "ws://localhost:3000",
     "example-doc-room",
@@ -12,9 +17,14 @@ console.time("Connected to socket server in");
 
 wsProvider.on("sync", event => {
     console.timeEnd("Connected to socket server in");
-    wsProvider.emit("client-request-initial-state");
+    onConnected();
 });
 
-window.someFunc = function someFunc() {
-    alert("SomeFunction!");
+let onConnected;
+
+window.changeDoc = ( cb ) => cb( doc );
+window.docExists = () => doc.getMap("mapData").entries.length === 0;
+window.syncedWithServer = wsProvider.synced;
+window.setOnConnect = cb => {
+    onConnected = cb;
 }

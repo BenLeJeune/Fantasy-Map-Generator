@@ -5,8 +5,6 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
-window.someFunc();
-
 // Switches to disable/enable logging features
 const PRODUCTION = window.location.host;
 const INFO = !PRODUCTION;
@@ -138,15 +136,15 @@ landmass.append("rect").attr("x", 0).attr("y", 0).attr("width", graphWidth).attr
 oceanPattern.append("rect").attr("fill", "url(#oceanic)").attr("x", 0).attr("y", 0).attr("width", graphWidth).attr("height", graphHeight);
 oceanLayers.append("rect").attr("id", "oceanBase").attr("x", 0).attr("y", 0).attr("width", graphWidth).attr("height", graphHeight);
 
-void function removeLoading() {
+function removeLoading() {
   d3.select("#loading").transition().duration(4000).style("opacity", 0).remove();
   d3.select("#initial").transition().duration(4000).attr("opacity", 0).remove();
   d3.select("#optionsContainer").transition().duration(3000).style("opacity", 1);
   d3.select("#tooltip").transition().duration(4000).style("opacity", 1);
-}()
+}
 
 // decide which map should be loaded or generated on page load
-void function checkLoadParameters() {
+function checkLoadParameters() {
   const url = new URL(window.location.href);
   const params = url.searchParams;
 
@@ -190,7 +188,14 @@ void function checkLoadParameters() {
 
   WARN && console.warn("Generate random map");
   generateMapOnLoad();
-}()
+}
+
+//CAUSES IT TO START WORKING WHEN CONNECTED TO SERVER
+window.setOnConnect(() => {
+  console.log("executing callback");
+  removeLoading();
+  checkLoadParameters();
+})
 
 function loadMapFromURL(maplink, random) {
   const URL = decodeURIComponent(maplink);
@@ -219,6 +224,14 @@ function generateMapOnLoad() {
   generate(); // generate map
   focusOn(); // based on searchParams focus on point, cell or burg from MFCG
   applyPreset(); // apply saved layers preset
+  console.log("LOADED THE MAP!");
+  window.changeDoc(doc => {
+    doc.transact(() => {
+      let mapData = doc.getMap("mapData");
+      mapData.set( "pack", pack );
+      mapData.set( "grid", grid );
+    })
+  })
 }
 
 // focus on coordinates, cell or burg provided in searchParams
