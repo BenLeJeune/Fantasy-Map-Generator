@@ -634,6 +634,8 @@ function generate() {
     WARN && console.warn(`TOTAL: ${rn((performance.now()-timeStart)/1000,2)}s`);
     showStatistics();
     INFO && console.groupEnd("Generated Map " + seed);
+    //DO THIS TO PREVENT WEIRD STUFF
+    changeMapSize();
   }
   catch(error) {
     ERROR && console.error(error);
