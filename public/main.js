@@ -130,6 +130,7 @@ let mapCoordinates = {}; // map coordinates on globe
 options.winds = [225, 45, 225, 315, 135, 315]; // default wind directions
 
 applyStoredOptions();
+//This data is required to ensure the seed always produces the same map
 let graphWidth = +mapWidthInput.value, graphHeight = +mapHeightInput.value; // voronoi graph extention, cannot be changed arter generation
 let svgWidth = graphWidth, svgHeight = graphHeight; // svg canvas resolution, can be changed
 landmass.append("rect").attr("x", 0).attr("y", 0).attr("width", graphWidth).attr("height", graphHeight);
@@ -226,24 +227,58 @@ function showUploadErrorMessage(error, URL, random) {
 }
 
 function generateMapOnLoad() {
+  window.changeDoc(doc => {
+    doc.transact(() => {
+      let mapData = doc.getMap("mapData");
+      console.log("MAPDATA");
+      console.log(mapData.toJSON());
+      console.log("has pack", mapData.has("pack"))
+      console.log("has grid", mapData.has("grid"))
+      if (window.docExists())  {
+        //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
+        console.log("Setting seed from DOC");
+
+        pack = mapData.get("pack");
+        grid = mapData.get("grid");
+
+        seed = mapData.get("seed");
+        mapId = mapData.get("mapId");
+        mapHistory = mapData.get("mapHistory");
+        modules = mapData.get("modules");
+        notes = mapData.get("notes");
+
+        //Ensures the seed always generates the same graph
+        let savedSize = mapData.get("graphSize");
+        graphWidth = savedSize.width;
+        graphHeight = savedSize.height;
+      }
+      else console.log("doc does not exist");
+    })
+  })
+  //default stuff
   applyStyleOnLoad(); // apply default of previously selected style
   generate(); // generate map
   focusOn(); // based on searchParams focus on point, cell or burg from MFCG
   applyPreset(); // apply saved layers preset
+
   window.changeDoc(doc => {
     doc.transact(() => {
       let mapData = doc.getMap("mapData");
-      if (!window.docExists()) {
-        mapData.set( "pack", pack );
-        mapData.set( "grid", grid );
-      } else {
-        //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
-        console.log("Setting the pack & grid");
-        pack = mapData.get("pack");
-        grid = mapData.get("grid");
-      }
+      console.log("MAP FULLY GENERATED");
+
+      mapData.set("grid", grid);
+      mapData.set("pack", pack);
+      mapData.set("seed", seed);
+      mapData.set("mapId", mapId);
+      mapData.set("mapHistory", mapHistory);
+      mapData.set("modules", modules);
+      mapData.set("notes", notes);
+
+      //To ensure the seed always generates the same data
+      mapData.set("graphSize", { width: graphWidth, height: graphHeight });
     })
   })
+
 }
 
 // focus on coordinates, cell or burg provided in searchParams
@@ -554,15 +589,15 @@ void function addDragToUpload() {
 function generate() {
   try {
     const timeStart = performance.now();
-    invokeActiveZooming();
-    generateSeed();
+    invokeActiveZooming(); //Adds the active zooming feature
+    if ( !window.docExists() ) generateSeed(); //GENERATION: Generates the random seed
     INFO && console.group("Generated Map " + seed);
-    applyMapSize();
-    randomizeOptions();
-    placePoints();
-    calculateVoronoi(grid, grid.points);
-    drawScaleBar();
-    HeightmapGenerator.generate();
+    applyMapSize(); //Just applies the canvas size that was already set
+    randomizeOptions(); //Randomises options
+    placePoints(); //Places points to calculate voronoi diagram
+    calculateVoronoi(grid, grid.points); //calculate diagrams
+    drawScaleBar(); //Draws scalebar
+    HeightmapGenerator.generate(); //Generates heightmap
     markFeatures();
     openNearSeaLakes();
     OceanLayers();

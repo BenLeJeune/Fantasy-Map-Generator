@@ -173,10 +173,10 @@ function changeMapSize() {
 // just apply canvas size that was already set
 function applyMapSize() {
   const zoomMin = +zoomExtentMin.value, zoomMax = +zoomExtentMax.value;
-  graphWidth = +mapWidthInput.value;
-  graphHeight = +mapHeightInput.value;
-  svgWidth = Math.min(graphWidth, window.innerWidth);
-  svgHeight = Math.min(graphHeight, window.innerHeight);
+  // graphWidth = +mapWidthInput.value;
+  // graphHeight = +mapHeightInput.value;
+  //svgWidth = Math.min(graphWidth, window.innerWidth);
+  //svgHeight = Math.min(graphHeight, window.innerHeight);
   svg.attr("width", svgWidth).attr("height", svgHeight);
   zoom.translateExtent([[0, 0], [graphWidth, graphHeight]]).scaleExtent([zoomMin, zoomMax]).scaleTo(svg, zoomMin);
 }
