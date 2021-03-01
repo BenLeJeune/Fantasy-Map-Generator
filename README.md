@@ -1,3 +1,6 @@
+# My Fork of Fantasy Map Generator
+Hello! I decided to make a fork of this to use CRDTs to create a version of this that features live editing capabilities, as well as possibly introducing new functionality, who knows.
+
 # Fantasy Map Generator
 
 Azgaar's _Fantasy Map Generator_ is a free client-side web application generating interactive and highly customizable svg maps based on voronoi diagram.
