@@ -148,6 +148,10 @@ function checkLoadParameters() {
   const url = new URL(window.location.href);
   const params = url.searchParams;
 
+  //_______________________
+  //CHECK IF THE DOC ALREADY EXISTS
+  let loaded = window.docExists();
+
   // of there is a valid maplink, try to load .map file from URL
   if (params.get("maplink")) {
     WARN && console.warn("Load map from URL");
@@ -190,12 +194,14 @@ function checkLoadParameters() {
   generateMapOnLoad();
 }
 
+//__________________________________________________
 //CAUSES IT TO START WORKING WHEN CONNECTED TO SERVER
 window.setOnConnect(() => {
   console.log("executing callback");
   removeLoading();
   checkLoadParameters();
 })
+//__________________________________________________
 
 function loadMapFromURL(maplink, random) {
   const URL = decodeURIComponent(maplink);
@@ -224,12 +230,17 @@ function generateMapOnLoad() {
   generate(); // generate map
   focusOn(); // based on searchParams focus on point, cell or burg from MFCG
   applyPreset(); // apply saved layers preset
-  console.log("LOADED THE MAP!");
   window.changeDoc(doc => {
     doc.transact(() => {
       let mapData = doc.getMap("mapData");
-      mapData.set( "pack", pack );
-      mapData.set( "grid", grid );
+      if (!window.docExists()) {
+        mapData.set( "pack", pack );
+        mapData.set( "grid", grid );
+      } else {
+        //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
+        pack = mapData.get("pack");
+        grid = mapData.get("grid");
+      }
     })
   })
 }

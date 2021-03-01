@@ -23,7 +23,10 @@ wsProvider.on("sync", event => {
 let onConnected;
 
 window.changeDoc = ( cb ) => cb( doc );
-window.docExists = () => doc.getMap("mapData").entries.length === 0;
+window.docExists = () => {
+    console.log(`Does this doc exist? `, mapData.toJSON())
+    return mapData.entries.length !== 0
+};
 window.syncedWithServer = wsProvider.synced;
 window.setOnConnect = cb => {
     onConnected = cb;
