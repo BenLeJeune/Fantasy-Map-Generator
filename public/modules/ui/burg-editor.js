@@ -254,6 +254,17 @@ function editBurg(id) {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].name = burgName.value;
     elSelected.text(burgName.value);
+    //LISTENER
+    window.changeDoc(doc => {
+      let mapData = doc.getMap("mapData");
+      let packMap = mapData.get("pack");
+      let burgs = packMap.get("burgs");
+      doc.transact(() => {
+        burgs.delete( id, 1 );
+        burgs.insert(id, [ pack.burgs[id] ]);
+      })
+      console.log("Did stuff!");
+    })
   }
 
   function generateNameRandom() {
@@ -264,12 +275,14 @@ function editBurg(id) {
 
   function changeType() {
     const id = +elSelected.attr("data-id");
-    pack.burgs[id].type = this.value;
+    pack.burgs[id].type = this.value
+    //LISTENER
   }
 
   function changeCulture() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].culture = +this.value;
+    //LISTENER
   }
 
   function generateNameCulture() {
@@ -282,6 +295,7 @@ function editBurg(id) {
   function changePopulation() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].population = rn(burgPopulation.value / populationRate.value / urbanization.value, 4);
+    //LISTENER
   }
 
   function toggleFeature() {
@@ -311,7 +325,7 @@ function editBurg(id) {
 
   function editGroupLabelStyle() {
     const g = elSelected.node().parentNode.id;
-    editStyle("labels", g);
+    editStyle("labels", g); //TODO: STYLE LISTENERS
   }
 
   function editGroupIconStyle() {
@@ -437,6 +451,7 @@ function editBurg(id) {
     burg.x = x;
     burg.y = y;
     if (burg.capital) pack.states[newState].center = burg.cell;
+    //LISTENER
 
     if (d3.event.shiftKey === false) toggleRelocateBurg();
   }
@@ -445,6 +460,7 @@ function editBurg(id) {
     const id = elSelected.attr("data-id");
     const name = elSelected.text();
     editNotes("burg"+id, name);
+    //LISTENER
   }
 
   function removeSelectedBurg() {
@@ -468,6 +484,7 @@ function editBurg(id) {
         }
       });
     }
+    //LISTENER
   }
 
   function closeBurgEditor() {

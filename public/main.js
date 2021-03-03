@@ -5,6 +5,24 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
+//
+//______________________
+// OBSERVERS & LISTENERS
+
+function setupListeners( mapData ) {
+    let mapPack = mapData.get("pack");
+    let burgs = mapPack.get("burgs");
+
+    //UPDATES BURGS WHENEVER SOMETHING HAPPENS
+    console.log("adding observer... ", burgs);
+    burgs.observe( event => {
+      console.log( event.changes.delta );
+      console.log(mapPack.toJSON());
+    } )
+
+}
+//______________________
+
 // Switches to disable/enable logging features
 const PRODUCTION = window.location.host;
 const INFO = !PRODUCTION;
@@ -231,14 +249,14 @@ function generateMapOnLoad() {
     doc.transact(() => {
       let mapData = doc.getMap("mapData");
       console.log("MAPDATA");
-      console.log(mapData.toJSON());
-      console.log("has pack", mapData.has("pack"))
-      console.log("has grid", mapData.has("grid"))
+      console.log(mapData.toJSON()); 
       if (window.docExists())  {
         //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
         console.log("Setting seed from DOC");
 
-        pack = mapData.get("pack");
+        pack = window.shallowMapToObject( mapData.get("pack") );
+        //Re-initialising
+        pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d]));
         grid = mapData.get("grid");
 
         seed = mapData.get("seed");
@@ -265,9 +283,18 @@ function generateMapOnLoad() {
     doc.transact(() => {
       let mapData = doc.getMap("mapData");
       console.log("MAP FULLY GENERATED");
-
       mapData.set("grid", grid);
-      mapData.set("pack", pack);
+
+      console.time("mapping-pack");
+      console.log("pack.cells.q: ", pack.cells.q);
+      let safePackCopy = _.cloneDeep( pack )
+      console.log("after assign:", pack.cells.q);
+      delete safePackCopy.cells.q; //is a function - delete this
+      console.log("after delete:", pack.cells.q);
+      let packMap = window.packToMap( safePackCopy );
+      console.timeEnd("mapping-pack");
+      mapData.set("pack", packMap);
+
       mapData.set("seed", seed);
       mapData.set("mapId", mapId);
       mapData.set("mapHistory", mapHistory);
@@ -276,6 +303,8 @@ function generateMapOnLoad() {
 
       //To ensure the seed always generates the same data
       mapData.set("graphSize", { width: graphWidth, height: graphHeight });
+
+      setupListeners( mapData );
     })
   })
 
