@@ -16,10 +16,21 @@ function setupListeners( mapData ) {
     //UPDATES BURGS WHENEVER SOMETHING HAPPENS
     console.log("adding observer... ", burgs);
     burgs.observe( event => {
-      console.log( event.changes.delta );
-      console.log(mapPack.toJSON());
-    } )
-
+      let changeDelta = event.changes.delta;
+      console.log(changeDelta);
+      if ( changeDelta.length = 3 
+        && changeDelta[0].hasOwnProperty("retain")
+        && changeDelta[1].hasOwnProperty("insert") 
+        && changeDelta[2].hasOwnProperty("delete") ) {
+          //THIS WILL OCCUR IF WE ARE UPDATING A BURG
+          console.log("Updating burg!");
+          let burgId = changeDelta[0]["retain"];
+          let element = burgLabels.select("[data-id='" + burgId + "']");
+          console.log(element);
+          let newBurg = burgs.get(burgId);
+          element.text( newBurg.name );
+      }
+    })
 }
 //______________________
 
