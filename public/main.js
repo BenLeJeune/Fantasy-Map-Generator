@@ -32,34 +32,22 @@ function setupListeners( doc ) {
 
   mapBurgs.observe( event => {
     console.log(event.changes.delta)
+    let changeDelta = event.changes.delta;
+    console.log(changeDelta);
+    if ( changeDelta.length = 3 
+      && changeDelta[0].hasOwnProperty("retain")
+      && changeDelta[1].hasOwnProperty("insert") 
+      && changeDelta[2].hasOwnProperty("delete") ) {
+        //THIS WILL OCCUR IF WE ARE UPDATING A BURG
+        let burgId = changeDelta[0]["retain"];
+        console.log(`Updating burg ${ burgId }`);
+        let element = burgLabels.select("[data-id='" + burgId + "']");
+        let newBurg = mapBurgs.get(burgId);
+        element.text( newBurg.name );
+        pack.burgs[ burgId ] = newBurg;
+        // console.log( pack.burgs, burgId );
+    }
   } )
-
-
-    //UPDATES BURGS WHENEVER SOMETHING HAPPENS
-    // console.log("adding observer... ", burgs);
-    // burgs.observe( event => {
-    //   let changeDelta = event.changes.delta;
-    //   console.log(changeDelta);
-    //   if ( changeDelta.length = 3 
-    //     && changeDelta[0].hasOwnProperty("retain")
-    //     && changeDelta[1].hasOwnProperty("insert") 
-    //     && changeDelta[2].hasOwnProperty("delete") ) {
-    //       //THIS WILL OCCUR IF WE ARE UPDATING A BURG
-    //       let burgId = changeDelta[0]["retain"];
-    //       console.log(`Updating burg ${ burgId }`);
-    //       let element = burgLabels.select("[data-id='" + burgId + "']");
-    //       let newBurg = burgs.get(burgId);
-    //       element.text( newBurg.name );
-    //       pack.burgs[ burgId ] = newBurg;
-    //       // console.log( pack.burgs, burgId );
-    //   }
-
-    //   //yknow what lets just do this
-    //   // pack.burgs = burgs.toArray();
-    //   // console.log("yArray:", burgs.toJSON());
-    //   // console.log("obj:", pack.burgs);
-    // })
-}
 //______________________
 
 // Switches to disable/enable logging features
