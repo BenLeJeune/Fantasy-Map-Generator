@@ -5,20 +5,34 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
-//
+//______________________
+//USEFUL FUNCTIONS
+function updateXML(doc) {
+  //UPDATE THE SVG XML
+  let mapXML = doc.getXmlFragment("mapXML");
+  let el = document.getElementById("map");
+  if (el) {
+    console.log("updating xml")
+    const cloneMapEl = el.cloneNode(true);
+    cloneMapEl.setAttribute("width", graphWidth);
+    cloneMapEl.setAttribute("height", graphHeight);
+    cloneMapEl.querySelector("#viewbox").removeAttribute("transform")
+    const svg_xml = ( new XMLSerializer() ).serializeToString( cloneMapEl );
+    if ( mapXML.length > 0 ) mapXML.delete(0);
+    mapXML.insert(0, [ svg_xml ]);
+  }
+}
 //______________________
 // OBSERVERS & LISTENERS
 
 function setupListeners( doc ) {
-
   doc.on("afterAllTransactions", ( doc, transactions ) => {
     console.log("A transaction has occurred");
     //fuck performance. whenever ANYTHING updates, it gets synced now. nice.
     let mapData = doc.getMap("mapData");
 
     let mapPack = mapData.get("pack");
-    let objPack = window.shallowMapToObject( mapPack );
-    pack.burgs = objPack.burgs.toArray();
+    pack.burgs = window.shallowMapToObject( mapPack ).burgs;
 
     seed = mapData.get("seed");
     mapId = mapData.get("mapId");
@@ -29,6 +43,10 @@ function setupListeners( doc ) {
   let mapData = doc.getMap("mapData");
   let mapPack = mapData.get("pack");
   let mapBurgs = mapPack.get("burgs");
+
+  mapData.observeDeep( event => {
+    updateXML(doc);
+  } )
 
   mapBurgs.observe( event => {
     console.log(event.changes.delta)
@@ -48,7 +66,164 @@ function setupListeners( doc ) {
         // console.log( pack.burgs, burgId );
     }
   } )
+}
 //______________________
+// LOADING & SAVING DATA
+function loadDataFromDoc( doc ) {
+  console.log("Loading Data From Doc");
+  let mapData = doc.getMap("mapData");
+
+  //Parse params
+  void function parseParams() {
+    mapId = mapData.get("mapId");
+    seed = mapData.get("seed");
+    let graphSize = mapData.get("graphSize");
+    graphWidth = graphSize.width;
+    graphHeight = graphSize.height;
+  }()
+
+  void function parseSettings() {
+    //NOTHING HERE YET
+    // NEED TO BE SYNCED?
+  }()
+
+  void function parseConfiguration() {
+    //STUFF THAT GOES HERE: BIOMES
+  }()
+
+  void function replaceSVG() {
+    svg.remove();
+    let mapXML = doc.getXmlFragment("mapXML");
+    document.body.insertAdjacentHTML("afterbegin", mapXML.toString() );
+  }();
+
+  void function redefineElements() {
+    svg = d3.select("#map");
+    defs = svg.select("#deftemp");
+    viewbox = svg.select("#viewbox");
+    scaleBar = svg.select("#scaleBar");
+    legend = svg.select("#legend");
+    ocean = viewbox.select("#ocean");
+    oceanLayers = ocean.select("#oceanLayers");
+    oceanPattern = ocean.select("#oceanPattern");
+    lakes = viewbox.select("#lakes");
+    landmass = viewbox.select("#landmass");
+    texture = viewbox.select("#texture");
+    terrs = viewbox.select("#terrs");
+    biomes = viewbox.select("#biomes");
+    ice = viewbox.select("#ice");
+    cells = viewbox.select("#cells");
+    gridOverlay = viewbox.select("#gridOverlay");
+    coordinates = viewbox.select("#coordinates");
+    compass = viewbox.select("#compass");
+    rivers = viewbox.select("#rivers");
+    terrain = viewbox.select("#terrain");
+    relig = viewbox.select("#relig");
+    cults = viewbox.select("#cults");
+    regions = viewbox.select("#regions");
+    statesBody = regions.select("#statesBody");
+    statesHalo = regions.select("#statesHalo");
+    provs = viewbox.select("#provs");
+    zones = viewbox.select("#zones");
+    borders = viewbox.select("#borders");
+    stateBorders = borders.select("#stateBorders");
+    provinceBorders = borders.select("#provinceBorders");
+    routes = viewbox.select("#routes");
+    roads = routes.select("#roads");
+    trails = routes.select("#trails");
+    searoutes = routes.select("#searoutes");
+    temperature = viewbox.select("#temperature");
+    coastline = viewbox.select("#coastline");
+    prec = viewbox.select("#prec");
+    population = viewbox.select("#population");
+    emblems = viewbox.select("#emblems");
+    labels = viewbox.select("#labels");
+    icons = viewbox.select("#icons");
+    burgIcons = icons.select("#burgIcons");
+    anchors = icons.select("#anchors");
+    armies = viewbox.select("#armies");
+    markers = viewbox.select("#markers");
+    ruler = viewbox.select("#ruler");
+    fogging = viewbox.select("#fogging");
+    debug = viewbox.select("#debug");
+    burgLabels = labels.select("#burgLabels");
+  }()
+
+  //Parse grid data
+  void function parseGridData() {
+    let mapGrid = mapData.get("grid");
+    let objGrid = window.shallowMapToObject(mapGrid);
+    console.log("newGrid:", objGrid);
+    grid = _.cloneDeep( objGrid );
+    calculateVoronoi( grid, grid.points );
+    grid.cells.h = objGrid.cells.h;
+    grid.cells.prec = objGrid.cells.prec;
+    grid.cells.f = objGrid.cells.f;
+    grid.cells.t = objGrid.cells.t;
+    grid.cells.temp = objGrid.cells.temp;
+  }()
+
+  //Parsing pack data
+    void function parsePackData() {
+    let mapPack = mapData.get("pack");
+    let objPack = window.shallowMapToObject( mapPack );
+    pack = {};
+    reGraph();
+    reMarkFeatures();
+    pack.features = objPack.features;
+    pack.cultures = objPack.cultures;
+    pack.states = objPack.states;
+    pack.burgs = objPack.burgs;
+    pack.religions = objPack.religions;
+    pack.provinces = objPack.provinces;
+    pack.rivers = objPack.rivers;
+    pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
+    
+    //Cells stuff
+    const cells = pack.cells, objCells = objPack.cells;
+    cells.biome = objCells.biome;
+    cells.burg = objCells.burg;
+    cells.conf = objCells.conf;
+    cells.culture = objCells.culture;
+    cells.fl = objCells.fl;
+    cells.pop = objCells.pop;
+    cells.r = objCells.r;
+    cells.road = objCells.road;
+    cells.s = objCells.s;
+    cells.state = objCells.state;
+    cells.religion = objCells.religion;
+    cells.province = objCells.province;
+    cells.crossroad = objCells.crossroad;  
+  }()
+
+  //What happens if this goes here?
+}
+
+function saveDataToDoc( doc ) {
+  let mapData = doc.getMap("mapData");
+  //Saving grid data
+  let packGrid = window.shallowObjectToMap( grid );
+  console.log(packGrid.toJSON());
+  mapData.set("grid", packGrid);
+
+  let safePackCopy = _.cloneDeep( pack );
+  delete safePackCopy.cells.q; //Function, must delete
+  let packMap = window.shallowObjectToMap( safePackCopy );
+  mapData.set("pack", packMap);
+
+  //Rest of the data
+  mapData.set("seed", seed);
+  mapData.set("mapId", mapId);
+  mapData.set("mapHistory", mapHistory);
+  mapData.set("modules", modules);
+  mapData.set("notes", notes);
+
+  //Share the innerHTML for setup?
+
+  //Sets map size
+  mapData.set("graphSize", { width: graphWidth, height: graphHeight })
+  updateXML(doc);
+}
 
 // Switches to disable/enable logging features
 const PRODUCTION = window.location.host;
@@ -277,66 +452,26 @@ function generateMapOnLoad() {
       let mapData = doc.getMap("mapData");
       console.log("MAPDATA");
       console.log(mapData.toJSON()); 
-      if (window.docExists())  {
-        //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
-        console.log("Doc exists - setting data from it");
-
-        pack = window.shallowMapToObject( mapData.get("pack") );
-        //Re-initialising
-        pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d]));
-        pack.burgs = mapData.get("pack").get("burgs").toArray(); //CONVERT FROM ARRAY
-        grid = mapData.get("grid");
-
-        seed = mapData.get("seed");
-        mapId = mapData.get("mapId");
-        mapHistory = mapData.get("mapHistory");
-        modules = mapData.get("modules");
-        notes = mapData.get("notes");
-
-        //Ensures the seed always generates the same graph
-        let savedSize = mapData.get("graphSize");
-        graphWidth = savedSize.width;
-        graphHeight = savedSize.height;
+      if (window.docExists())  {       
+        loadDataFromDoc(doc);
       }
-      else console.log("doc does not exist");
-    })
-  })
-  //default stuff
-  applyStyleOnLoad(); // apply default of previously selected style
-  generate(); // generate map
-  focusOn(); // based on searchParams focus on point, cell or burg from MFCG
-  applyPreset(); // apply saved layers preset
+      else {
+        //default stuff
+        applyStyleOnLoad(); // apply default of previously selected style
+        generate(); // generate map
+        focusOn(); // based on searchParams focus on point, cell or burg from MFCG
+        applyPreset(); // apply saved layers preset
 
-  window.changeDoc(doc => {
-    doc.transact(() => {
-      let mapData = doc.getMap("mapData");
-      console.log("MAP FULLY GENERATED");
-      if ( !window.docExists() ) {
-        mapData.set("grid", grid);
-
-        console.time("mapping-pack");
-        let safePackCopy = _.cloneDeep( pack )
-        delete safePackCopy.cells.q; //is a function - delete this
-        let packMap = window.packToMap( safePackCopy );
-
-        console.timeEnd("mapping-pack");
-
-        //Set the data
-        mapData.set("pack", packMap);
-
-        mapData.set("seed", seed);
-        mapData.set("mapId", mapId);
-        mapData.set("mapHistory", mapHistory);
-        mapData.set("modules", modules);
-        mapData.set("notes", notes);
-
-        //To ensure the seed always generates the same data
-        mapData.set("graphSize", { width: graphWidth, height: graphHeight });
+        window.changeDoc(doc => {
+          doc.transact(() => {
+            console.log("Map generated");
+            saveDataToDoc(doc);
+          })
+        })
       }
       setupListeners( doc );
     })
   })
-
 }
 
 // focus on coordinates, cell or burg provided in searchParams

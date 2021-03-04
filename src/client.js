@@ -36,6 +36,8 @@ window.setOnConnect = cb => {
     onConnected = cb;
 }
 
+window.Y = () => Y;
+
 window.registerObserver = observer => observers.push( observer );
 
 window.packToMap = pack => {
@@ -55,10 +57,37 @@ window.packToMap = pack => {
     return packMap;
 }
 
+
+///
+/// CONVERTS A MAP BACK INTO AN OBJECT
+/// CONVERTS Y ARRAYS INTO REGULAR ARRAYS
+///
 window.shallowMapToObject = map => {
     let destObj = {};
     for ( let [ key, value ] of map ) {
-        destObj[key] = value;
+        if ( value.toArray ) {
+            destObj[key] = value.toArray()
+        } else {
+            destObj = Object.assign( destObj, { [key]: value } );
+        }
     }
     return destObj;
+}
+
+///
+/// THIS CONVERTS AN OBJECT INTO A MAP
+/// THE OBJECT'S PROPERTIES WILL BE CONVERTED INTO APPROPRIATE Y DATA TYPES
+///
+window.shallowObjectToMap = object => {
+    let map = new Y.Map();
+    for ( let key of Object.keys(object) ) {
+        if ( Array.isArray( object[key] )) {
+            let arr = new Y.Array();
+            arr.push( object[key] );
+            map.set( key, arr );
+        } else {
+            map.set( key, object[key] );
+        }
+    }
+    return map;
 }
