@@ -9,28 +9,56 @@ document.title += " v" + version;
 //______________________
 // OBSERVERS & LISTENERS
 
-function setupListeners( mapData ) {
+function setupListeners( doc ) {
+
+  doc.on("afterAllTransactions", ( doc, transactions ) => {
+    console.log("A transaction has occurred");
+    //fuck performance. whenever ANYTHING updates, it gets synced now. nice.
+    let mapData = doc.getMap("mapData");
+
     let mapPack = mapData.get("pack");
-    let burgs = mapPack.get("burgs");
+    let objPack = window.shallowMapToObject( mapPack );
+    pack.burgs = objPack.burgs.toArray();
+
+    seed = mapData.get("seed");
+    mapId = mapData.get("mapId");
+    mapHistory = mapData.get("mapHistory");
+    mapData.get("notes", notes); 
+  });
+
+  let mapData = doc.getMap("mapData");
+  let mapPack = mapData.get("pack");
+  let mapBurgs = mapPack.get("burgs");
+
+  mapBurgs.observe( event => {
+    console.log(event.changes.delta)
+  } )
+
 
     //UPDATES BURGS WHENEVER SOMETHING HAPPENS
-    console.log("adding observer... ", burgs);
-    burgs.observe( event => {
-      let changeDelta = event.changes.delta;
-      console.log(changeDelta);
-      if ( changeDelta.length = 3 
-        && changeDelta[0].hasOwnProperty("retain")
-        && changeDelta[1].hasOwnProperty("insert") 
-        && changeDelta[2].hasOwnProperty("delete") ) {
-          //THIS WILL OCCUR IF WE ARE UPDATING A BURG
-          console.log("Updating burg!");
-          let burgId = changeDelta[0]["retain"];
-          let element = burgLabels.select("[data-id='" + burgId + "']");
-          console.log(element);
-          let newBurg = burgs.get(burgId);
-          element.text( newBurg.name );
-      }
-    })
+    // console.log("adding observer... ", burgs);
+    // burgs.observe( event => {
+    //   let changeDelta = event.changes.delta;
+    //   console.log(changeDelta);
+    //   if ( changeDelta.length = 3 
+    //     && changeDelta[0].hasOwnProperty("retain")
+    //     && changeDelta[1].hasOwnProperty("insert") 
+    //     && changeDelta[2].hasOwnProperty("delete") ) {
+    //       //THIS WILL OCCUR IF WE ARE UPDATING A BURG
+    //       let burgId = changeDelta[0]["retain"];
+    //       console.log(`Updating burg ${ burgId }`);
+    //       let element = burgLabels.select("[data-id='" + burgId + "']");
+    //       let newBurg = burgs.get(burgId);
+    //       element.text( newBurg.name );
+    //       pack.burgs[ burgId ] = newBurg;
+    //       // console.log( pack.burgs, burgId );
+    //   }
+
+    //   //yknow what lets just do this
+    //   // pack.burgs = burgs.toArray();
+    //   // console.log("yArray:", burgs.toJSON());
+    //   // console.log("obj:", pack.burgs);
+    // })
 }
 //______________________
 
@@ -263,11 +291,12 @@ function generateMapOnLoad() {
       console.log(mapData.toJSON()); 
       if (window.docExists())  {
         //IF THE DOC ALREADY EXITS, SET TO MATCH THE DATA
-        console.log("Setting seed from DOC");
+        console.log("Doc exists - setting data from it");
 
         pack = window.shallowMapToObject( mapData.get("pack") );
         //Re-initialising
         pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d]));
+        pack.burgs = mapData.get("pack").get("burgs").toArray(); //CONVERT FROM ARRAY
         grid = mapData.get("grid");
 
         seed = mapData.get("seed");
@@ -294,28 +323,29 @@ function generateMapOnLoad() {
     doc.transact(() => {
       let mapData = doc.getMap("mapData");
       console.log("MAP FULLY GENERATED");
-      mapData.set("grid", grid);
+      if ( !window.docExists() ) {
+        mapData.set("grid", grid);
 
-      console.time("mapping-pack");
-      console.log("pack.cells.q: ", pack.cells.q);
-      let safePackCopy = _.cloneDeep( pack )
-      console.log("after assign:", pack.cells.q);
-      delete safePackCopy.cells.q; //is a function - delete this
-      console.log("after delete:", pack.cells.q);
-      let packMap = window.packToMap( safePackCopy );
-      console.timeEnd("mapping-pack");
-      mapData.set("pack", packMap);
+        console.time("mapping-pack");
+        let safePackCopy = _.cloneDeep( pack )
+        delete safePackCopy.cells.q; //is a function - delete this
+        let packMap = window.packToMap( safePackCopy );
 
-      mapData.set("seed", seed);
-      mapData.set("mapId", mapId);
-      mapData.set("mapHistory", mapHistory);
-      mapData.set("modules", modules);
-      mapData.set("notes", notes);
+        console.timeEnd("mapping-pack");
 
-      //To ensure the seed always generates the same data
-      mapData.set("graphSize", { width: graphWidth, height: graphHeight });
+        //Set the data
+        mapData.set("pack", packMap);
 
-      setupListeners( mapData );
+        mapData.set("seed", seed);
+        mapData.set("mapId", mapId);
+        mapData.set("mapHistory", mapHistory);
+        mapData.set("modules", modules);
+        mapData.set("notes", notes);
+
+        //To ensure the seed always generates the same data
+        mapData.set("graphSize", { width: graphWidth, height: graphHeight });
+      }
+      setupListeners( doc );
     })
   })
 

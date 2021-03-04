@@ -262,8 +262,7 @@ function editBurg(id) {
       doc.transact(() => {
         burgs.delete( id, 1 );
         burgs.insert(id, [ pack.burgs[id] ]);
-      })
-      console.log("Did stuff!");
+      });
     })
   }
 
