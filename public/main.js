@@ -169,7 +169,7 @@ function loadDataFromDoc( doc ) {
   }()
 
   //Parsing pack data
-    void function parsePackData() {
+  void function parsePackData() {
     let mapPack = mapData.get("pack");
     let objPack = window.shallowMapToObject( mapPack );
     pack = {};
@@ -201,7 +201,21 @@ function loadDataFromDoc( doc ) {
     cells.crossroad = objCells.crossroad;  
   }()
 
-  //What happens if this goes here?
+  void function restoreEvents() {
+    ruler.selectAll("g").call(d3.drag().on("start", dragRuler));
+    ruler.selectAll("text").on("click", removeParent);
+    ruler.selectAll("g.ruler circle").call(d3.drag().on("drag", dragRulerEdge));
+    ruler.selectAll("g.ruler circle").call(d3.drag().on("drag", dragRulerEdge));
+    ruler.selectAll("g.ruler rect").call(d3.drag().on("start", rulerCenterDrag));
+    ruler.selectAll("g.opisometer circle").call(d3.drag().on("start", dragOpisometerEnd));
+    ruler.selectAll("g.opisometer circle").call(d3.drag().on("start", dragOpisometerEnd));
+
+    scaleBar.on("mousemove", () => tip("Click to open Units Editor")).on("click", () => editUnits());
+    legend.on("mousemove", () => tip("Drag to change the position. Click to hide the legend")).on("click", () => clearLegend());
+  }()
+
+  if (window.restoreDefaultEvents) restoreDefaultEvents();
+  invokeActiveZooming();
 }
 
 function saveDataToDoc( doc ) {
