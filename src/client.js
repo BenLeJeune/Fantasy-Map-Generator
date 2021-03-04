@@ -26,6 +26,8 @@ wsProvider.on("sync", event => {
 
 let onConnected;
 
+window.doc = ( cb ) => cb( doc, Y );
+
 window.changeDoc = ( cb ) => cb( doc, Y );
 window.docExists = () => {
     console.log(`Does this doc exist? `, mapData.toJSON())

@@ -5,20 +5,22 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
+let mapLoaded = false;
+
 //______________________
 //USEFUL FUNCTIONS
 function updateXML(doc) {
   //UPDATE THE SVG XML
   let mapXML = doc.getXmlFragment("mapXML");
   let el = document.getElementById("map");
-  if (el) {
+  if (el && mapLoaded) {
     console.log("updating xml")
     const cloneMapEl = el.cloneNode(true);
     cloneMapEl.setAttribute("width", graphWidth);
     cloneMapEl.setAttribute("height", graphHeight);
     cloneMapEl.querySelector("#viewbox").removeAttribute("transform")
     const svg_xml = ( new XMLSerializer() ).serializeToString( cloneMapEl );
-    if ( mapXML.length > 0 ) mapXML.delete(0);
+    if ( mapXML.length > 0 ) {mapXML.delete(0);console.log("deleting xml");}
     mapXML.insert(0, [ svg_xml ]);
   }
 }
@@ -66,6 +68,9 @@ function setupListeners( doc ) {
         // console.log( pack.burgs, burgId );
     }
   } )
+
+  mapLoaded = true;
+
 }
 //______________________
 // LOADING & SAVING DATA
@@ -362,16 +367,13 @@ function removeLoading() {
   d3.select("#initial").transition().duration(4000).attr("opacity", 0).remove();
   d3.select("#optionsContainer").transition().duration(3000).style("opacity", 1);
   d3.select("#tooltip").transition().duration(4000).style("opacity", 1);
+  setTimeout(() =>  window.doc( doc => updateXML(doc) ), 4000);
 }
 
 // decide which map should be loaded or generated on page load
 function checkLoadParameters() {
   const url = new URL(window.location.href);
   const params = url.searchParams;
-
-  //_______________________
-  //CHECK IF THE DOC ALREADY EXISTS
-  let loaded = window.docExists();
 
   // of there is a valid maplink, try to load .map file from URL
   if (params.get("maplink")) {
