@@ -255,15 +255,7 @@ function editBurg(id) {
     pack.burgs[id].name = burgName.value;
     elSelected.text(burgName.value);
     //LISTENER
-    window.changeDoc(doc => {
-      let mapData = doc.getMap("mapData");
-      let packMap = mapData.get("pack");
-      let burgs = packMap.get("burgs");
-      doc.transact(() => {
-        burgs.delete( id, 1 );
-        burgs.insert(id, [ pack.burgs[id] ]);
-      });
-    })
+    docUpdateBurg(id);
   }
 
   function generateNameRandom() {
@@ -276,12 +268,14 @@ function editBurg(id) {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].type = this.value
     //LISTENER
+    docUpdateBurg(id);
   }
 
   function changeCulture() {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].culture = +this.value;
     //LISTENER
+    docUpdateBurg(id);
   }
 
   function generateNameCulture() {
@@ -295,6 +289,7 @@ function editBurg(id) {
     const id = +elSelected.attr("data-id");
     pack.burgs[id].population = rn(burgPopulation.value / populationRate.value / urbanization.value, 4);
     //LISTENER
+    docUpdateBurg(id);
   }
 
   function toggleFeature() {
@@ -304,7 +299,10 @@ function editBurg(id) {
     const turnOn = this.classList.contains("inactive");
     if (feature === "port") togglePort(id);
     else if(feature === "capital") toggleCapital(id);
-    else b[feature] = +turnOn;
+    else { //If it's not a super important feature we just do this
+      b[feature] = +turnOn;
+      docUpdateBurg(id);
+    }
     if (b[feature]) this.classList.remove("inactive");
     else if (!b[feature]) this.classList.add("inactive");
 

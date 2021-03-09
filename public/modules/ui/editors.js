@@ -200,18 +200,30 @@ function toggleCapital(burg) {
   pack.burgs[old].capital = 0;
   moveBurgToGroup(burg, "cities");
   moveBurgToGroup(old, "towns");
+  //TODO: Update states as well?
+  docUpdateState(state);
+  docUpdateBurg(burg);
+  docUpdateBurg(old);  
 }
 
 function togglePort(burg) {
   const anchor = document.querySelector("#anchors [data-id='" + burg + "']");
   if (anchor) anchor.remove();
   const b = pack.burgs[burg];
-  if (b.port) {b.port = 0; return;} // not a port anymore
+  if (b.port) {
+    b.port = 0;
+    docUpdateBurg( burg );
+    return;
+  } // not a port anymore
 
   const haven = pack.cells.haven[b.cell];
   const port = haven ? pack.cells.f[haven] : -1;
   if (!haven) tip("Port haven is not found, system won't be able to make a searoute", false, "warn");
   b.port = port;
+
+  docUpdateBurg(burg);
+  //TODO: THIS MIGHT CAUSE ISSUES WITH SEA ROUTES
+  //MAY NEED TO SYNC OTHER STUFF
 
   const g = b.capital ? "cities" : "towns";
   const group = anchors.select("g#"+g);

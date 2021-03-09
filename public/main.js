@@ -8,64 +8,80 @@ document.title += " v" + version;
 let mapLoaded = false;
 
 //______________________
-//USEFUL FUNCTIONS
-function updateXML(doc) {
-  //UPDATE THE SVG XML
-  let mapXML = doc.getXmlFragment("mapXML");
-  let el = document.getElementById("map");
-  if (el && mapLoaded) {
-    console.log("updating xml")
-    const cloneMapEl = el.cloneNode(true);
-    cloneMapEl.setAttribute("width", graphWidth);
-    cloneMapEl.setAttribute("height", graphHeight);
-    cloneMapEl.querySelector("#viewbox").removeAttribute("transform")
-    const svg_xml = ( new XMLSerializer() ).serializeToString( cloneMapEl );
-    if ( mapXML.length > 0 ) {mapXML.delete(0);console.log("deleting xml");}
-    mapXML.insert(0, [ svg_xml ]);
-  }
-}
-//______________________
 // OBSERVERS & LISTENERS
 
 function setupListeners( doc ) {
   doc.on("afterAllTransactions", ( doc, transactions ) => {
     console.log("A transaction has occurred");
-    //fuck performance. whenever ANYTHING updates, it gets synced now. nice.
-    let mapData = doc.getMap("mapData");
-
-    let mapPack = mapData.get("pack");
-    pack.burgs = window.shallowMapToObject( mapPack ).burgs;
-
-    seed = mapData.get("seed");
-    mapId = mapData.get("mapId");
-    mapHistory = mapData.get("mapHistory");
-    mapData.get("notes", notes); 
   });
 
   let mapData = doc.getMap("mapData");
   let mapPack = mapData.get("pack");
   let mapBurgs = mapPack.get("burgs");
+  let mapStates = mapPack.get("states");
 
-  mapData.observeDeep( event => {
-    updateXML(doc);
+  mapStates.observe( event => {
+    let changeDelta = event.changes.delta;
+    if ( changeDelta.length = 3 ) {
+      if ( changeDelta[0].hasOwnProperty("retain")
+          && changeDelta[1].hasOwnProperty("insert")
+          && changeDelta[2].hasOwnProperty("delete") )
+          {
+            //This will occur when we update a state
+            let stateId = changeDelta[0]["retain"];
+            let newState = mapStates.get(stateId);
+            pack.states[stateId] = newState;
+          }
+    }
   } )
 
   mapBurgs.observe( event => {
     console.log(event.changes.delta)
     let changeDelta = event.changes.delta;
     console.log(changeDelta);
-    if ( changeDelta.length = 3 
-      && changeDelta[0].hasOwnProperty("retain")
-      && changeDelta[1].hasOwnProperty("insert") 
-      && changeDelta[2].hasOwnProperty("delete") ) {
-        //THIS WILL OCCUR IF WE ARE UPDATING A BURG
-        let burgId = changeDelta[0]["retain"];
-        console.log(`Updating burg ${ burgId }`);
-        let element = burgLabels.select("[data-id='" + burgId + "']");
-        let newBurg = mapBurgs.get(burgId);
-        element.text( newBurg.name );
-        pack.burgs[ burgId ] = newBurg;
-        // console.log( pack.burgs, burgId );
+    if ( changeDelta.length = 3) {
+      if (changeDelta[0].hasOwnProperty("retain")
+          && changeDelta[1].hasOwnProperty("insert") 
+          && changeDelta[2].hasOwnProperty("delete") ) 
+          {
+             //THIS WILL OCCUR IF WE ARE UPDATING A BURG
+              let burgId = changeDelta[0]["retain"];
+              console.log(`Updating burg ${ burgId }`);
+
+              let newBurg = mapBurgs.get(burgId);
+
+              if ( newBurg.name !== pack.burgs[burgId].name ) {
+                //will only update if the names are different
+                let element = burgLabels.select("[data-id='" + burgId + "']");
+                element.text( newBurg.name );
+              }
+              if ( newBurg.port !== pack.burgs[burgId].port ) {
+                if ( newBurg.port === 0 || !newBurg.port ) {
+                  //We want to remove the anchor element
+                  const anchor = document.querySelector(("#anchors [data-id='" + burgId + "']"));
+                  if ( anchor ) anchor.remove();
+                } else {
+                  //We want to add an anchor element 
+                  const g = newBurg.capital ? "cities" : "towns";
+                  const group = anchors.select("g#"+g);
+                  const size = +group.attr("size");
+                  group.append("use").attr("xlink:href", "#icon-anchor").attr("data-id", burgId)
+                    .attr("x", rn(newBurg.x - size * .47, 2)).attr("y", rn(newBurg.y - size * .47, 2))
+                    .attr("width", size).attr("height", size);
+                }
+              }
+
+              if ( newBurg.capital !== pack.burgs[burgId].capital ) {
+                //The status as a capital has changed!
+                if ( newBurg.capital === 1 ) {
+                  //Is a capital now!
+                  moveBurgToGroup( burgId, "cities" );
+                } else if ( newBurg.capital === 0 ) {
+                  moveBurgToGroup( burgId, "towns" );
+                }
+              }
+              pack.burgs[ burgId ] = newBurg; //The burg is updated
+          }        
     }
   } )
 
@@ -96,11 +112,6 @@ function loadDataFromDoc( doc ) {
     //STUFF THAT GOES HERE: BIOMES
   }()
 
-  void function replaceSVG() {
-    svg.remove();
-    let mapXML = doc.getXmlFragment("mapXML");
-    document.body.insertAdjacentHTML("afterbegin", mapXML.toString() );
-  }();
 
   void function redefineElements() {
     svg = d3.select("#map");
@@ -198,8 +209,16 @@ function loadDataFromDoc( doc ) {
     cells.state = objCells.state;
     cells.religion = objCells.religion;
     cells.province = objCells.province;
-    cells.crossroad = objCells.crossroad;  
+    cells.crossroad = objCells.crossroad;
+    console.log("parsePackData:", pack.cells);  
   }()
+
+  void function replaceSVG() {
+    undraw();
+    // let mapXML = doc.getXmlFragment("mapXML");
+    // document.body.insertAdjacentHTML("afterbegin", mapXML.toString() );
+    regenerateFromState();
+  }();
 
   void function restoreEvents() {
     ruler.selectAll("g").call(d3.drag().on("start", dragRuler));
@@ -241,7 +260,6 @@ function saveDataToDoc( doc ) {
 
   //Sets map size
   mapData.set("graphSize", { width: graphWidth, height: graphHeight })
-  updateXML(doc);
 }
 
 // Switches to disable/enable logging features
@@ -380,8 +398,7 @@ function removeLoading() {
   d3.select("#loading").transition().duration(4000).style("opacity", 0).remove();
   d3.select("#initial").transition().duration(4000).attr("opacity", 0).remove();
   d3.select("#optionsContainer").transition().duration(3000).style("opacity", 1);
-  d3.select("#tooltip").transition().duration(4000).style("opacity", 1);
-  setTimeout(() =>  window.doc( doc => updateXML(doc) ), 4000);
+  d3.select("#tooltip").transition().duration(4000).style("opacity", 1)
 }
 
 // decide which map should be loaded or generated on page load
