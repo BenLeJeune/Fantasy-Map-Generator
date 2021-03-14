@@ -1,6 +1,6 @@
 
 function regenerateFromState() {
-    try {
+    // try {
         applyStyleOnLoad();
         invokeActiveZooming(); //Adds the active zooming feature
         console.group("Regenerating map from state...");
@@ -33,8 +33,8 @@ function regenerateFromState() {
         
         console.groupEnd("Regenerating map from state...");
 
-    }
-    catch (err) {
-        console.log(err);
-    }
+    // }
+    // catch (err) {
+    //     console.log(err);
+    // }
 }

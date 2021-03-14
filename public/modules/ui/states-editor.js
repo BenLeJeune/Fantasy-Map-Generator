@@ -211,6 +211,7 @@ function editStates() {
       const darkerColor = d3.color(solidColor).darker().hex();
       armies.select("#army"+state).attr("fill", solidColor);
       armies.select("#army"+state).selectAll("g > rect:nth-of-type(2)").attr("fill", darkerColor);
+      docUpdateState( state );
     }
 
     openPicker(currentFill, callback);
@@ -304,6 +305,7 @@ function editStates() {
       s.formName = formSelect.value;
       s.fullName = fullNameInput.value;
       if (changed && stateNameEditorUpdateLabel.checked) BurgsAndStates.drawStateLabels([s.i]);
+      docUpdateState( state );
       refreshStatesEditor();
     }
   }
@@ -714,14 +716,17 @@ function editStates() {
     const cells = pack.cells, affectedStates = [], affectedProvinces = [];
 
     statesBody.select("#temp").selectAll("polygon").each(function() {
-      const i = +this.dataset.cell;
-      const c = +this.dataset.state;
+      const i = +this.dataset.cell; //The cell ID
+      const c = +this.dataset.state; // The cell's state
       affectedStates.push(cells.state[i], c);
       affectedProvinces.push(cells.province[i]);
       cells.state[i] = c;
-      if (cells.burg[i]) pack.burgs[cells.burg[i]].state = c;
+      if (cells.burg[i]) {
+        pack.burgs[cells.burg[i]].state = c;
+        docUpdateBurg(cells.burg[i]);
+      }
     });
-
+     
     if (affectedStates.length) {
       refreshStatesEditor();
       if (!layerIsOn("toggleStates")) toggleStates(); else drawStates();
@@ -730,6 +735,11 @@ function editStates() {
       if (!layerIsOn("toggleBorders")) toggleBorders(); else drawBorders();
       if (layerIsOn("toggleProvinces")) drawProvinces();
     }
+    
+    docUpdateProvinces();
+    docUpdateCells();
+    docTriggerProvinceChange( affectedProvinces )
+
     exitStatesManualAssignment();
   }
 

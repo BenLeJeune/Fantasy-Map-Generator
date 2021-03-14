@@ -5,12 +5,25 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
+function reDefineCellFunction() {
+  pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
+}
+
+function reDefineIntArrays() {
+  //Check if this is an iterable
+  if ( typeof pack.cells.i[Symbol.iterator] === "function" ) {
+    console.log("pack.cells.i is iterable!");
+  }
+  else console.log("pack.cells.i not iterable!");
+}
+
 let mapLoaded = false;
 //______________________
 // LOADING & SAVING DATA
 function loadDataFromDoc( doc ) {
   console.log("Loading Data From Doc");
   let mapData = doc.getMap("mapData");
+  console.log(mapData.toJSON());
 
   //Parse params
   void function parseParams() {
@@ -87,7 +100,7 @@ function loadDataFromDoc( doc ) {
   void function parseGridData() {
     let mapGrid = mapData.get("grid");
     let objGrid = window.shallowMapToObject(mapGrid);
-    console.log("newGrid:", objGrid);
+    console.log("shallow:", objGrid)
     grid = _.cloneDeep( objGrid );
     calculateVoronoi( grid, grid.points );
     grid.cells.h = objGrid.cells.h;
@@ -111,7 +124,9 @@ function loadDataFromDoc( doc ) {
     pack.religions = objPack.religions;
     pack.provinces = objPack.provinces;
     pack.rivers = objPack.rivers;
+
     pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
+    reDefineIntArrays();
     
     //Cells stuff
     const cells = pack.cells, objCells = objPack.cells;
@@ -156,6 +171,7 @@ function loadDataFromDoc( doc ) {
 }
 
 function saveDataToDoc( doc ) {
+  console.log("saving");
   let mapData = doc.getMap("mapData");
   //Saving grid data
   let packGrid = window.shallowObjectToMap( grid );
@@ -178,6 +194,15 @@ function saveDataToDoc( doc ) {
 
   //Sets map size
   mapData.set("graphSize", { width: graphWidth, height: graphHeight })
+
+  //THESE ARRAYS ARE USED FOR KEEPING TRACK OF SPECIFIC CHANGES
+  let changesTemplate = {
+    heightmap: [],
+    states: [],
+    provinces: []
+  };
+  let changesMap = window.shallowObjectToMap( changesTemplate )
+  mapData.set("changes", changesMap );
 }
 
 // Switches to disable/enable logging features

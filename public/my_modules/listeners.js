@@ -1,4 +1,4 @@
-const isArrayUpdate = changeDelta => {
+const isArrayUpdate = changeDelta => { //If the update is a simple delete/insert
     if ( changeDelta.length === 3 ) {
         return changeDelta[0].hasOwnProperty("retain")
                 && changeDelta[1].hasOwnProperty("insert")
@@ -31,6 +31,17 @@ function setupListeners( doc ) {
     } )
 
     //--------------
+    // CELLS, PROVINCES, OTHER PACK CHANGES
+    //--------------
+    mapPack.observe( event => {
+        console.log("mapPack event:", event);
+        if ( event.hasOwnProperty("keysChanged") ) {
+            if ( event.keysChanged.has("cells") ) cellListener(doc); //We're updating the cells
+            if ( event.keysChanged.has("provinces") ) provinceListener(doc); //We're updating the provinces
+        }
+    } )
+
+    //--------------
     // BURGS
     //--------------
     mapBurgs.observe( event => {
@@ -38,8 +49,34 @@ function setupListeners( doc ) {
             let burgId = event.changes.delta[0]["retain"];
             burgListener( burgId, doc );
         }
+    });
+
+    //------------
+    // CELL CHANGES e.g heightmap, state, province, etc
+    //-------------
+    let changes = mapData.get("changes");
+    
+    changes.get("heightmap").observe( event => {
+        console.log("changing heightmap"); 
+    } );
+
+    changes.get("states").observe( event => {
+        console.log("changing states");
+        console.log(event);
+        StateRedrawListener( doc, event );
+    } );
+
+    changes.get("provinces").observe( () => {
+        console.log("changing provinces");
+        provinceRedrawListener( doc );
     })
+
 
     mapLoaded = true;
 
+}
+
+//REDRAWING STUFF
+function postStatesManualAssignment(affectedStates, affectedProvinces) {
+    
 }
