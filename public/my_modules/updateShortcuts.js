@@ -1,13 +1,18 @@
+/// ----------
+/// DELETE&INSERT UPDATES
+/// ----------
 function docUpdateBurg(id) {
     console.log(`updating ${ id }`)
     if ( Array.isArray( id ) ) {
-        for ( burg of id ) {
-            window.changeDoc( doc => {
-                let burgs = doc.getMap("mapData").get("pack").get("burgs");
-                burgs.delete( burg, 1 );
-                burgs.insert( burg, [ pack.burgs[burg] ] )
+        window.changeDoc( doc => {
+            let burgs = doc.getMap("mapData").get("pack").get("burgs");
+            doc.transact(() => {
+                for ( burg of id ) {
+                    burgs.delete( burg, 1 );
+                    burgs.insert( burg, [ pack.burgs[burg] ] );
+                }
             })
-        }
+        } )
     } 
     else {
         window.changeDoc( doc => {
@@ -48,6 +53,15 @@ function docUpdateState(state) {
     } )
 }
 
+/// ----------
+/// DELETIONS
+/// ----------
+
+//Burg deletions can be accomplished by updating (they aren't truly "removed")
+
+/// ----------
+/// TRIGGER REDRAWS WHEN "PAINTING"
+/// ----------
 function docTriggerStateChange( affectedStates ) {
     window.changeDoc( doc => {
         let stateChanges = doc.getMap("mapData").get("changes").get("states");

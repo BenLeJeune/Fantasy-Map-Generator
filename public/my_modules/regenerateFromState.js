@@ -31,6 +31,8 @@ function regenerateFromState() {
 
         Rivers.specify();
         
+        defineMapSize();
+
         console.groupEnd("Regenerating map from state...");
 
     // }

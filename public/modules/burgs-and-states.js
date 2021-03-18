@@ -240,7 +240,7 @@
     icons.selectAll("use").remove();
 
     // capitals
-    const capitals = pack.burgs.filter(b => b.capital);
+    const capitals = pack.burgs.filter(b => b.capital && !b.removed);
     const capitalIcons = burgIcons.select("#cities");
     const capitalLabels = burgLabels.select("#cities");
     const capitalSize = capitalIcons.attr("size") || 1;
@@ -261,7 +261,7 @@
       .attr("width", caSize).attr("height", caSize);
 
     // towns
-    const towns = pack.burgs.filter(b => b.i && !b.capital);
+    const towns = pack.burgs.filter(b => b.i && !b.capital && !b.removed);
     const townIcons = burgIcons.select("#towns");
     const townLabels = burgLabels.select("#towns");
     const townSize = townIcons.attr("size") || 0.5;

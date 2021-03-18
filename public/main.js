@@ -9,13 +9,6 @@ function reDefineCellFunction() {
   pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
 }
 
-function reDefineIntArrays() {
-  //Check if this is an iterable
-  if ( typeof pack.cells.i[Symbol.iterator] === "function" ) {
-    console.log("pack.cells.i is iterable!");
-  }
-  else console.log("pack.cells.i not iterable!");
-}
 
 let mapLoaded = false;
 //______________________
@@ -126,7 +119,6 @@ function loadDataFromDoc( doc ) {
     pack.rivers = objPack.rivers;
 
     pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
-    reDefineIntArrays();
     
     //Cells stuff
     const cells = pack.cells, objCells = objPack.cells;

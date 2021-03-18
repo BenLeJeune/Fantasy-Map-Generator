@@ -77,6 +77,7 @@ function adjustProvinces(affectedProvinces) {
 function provinceRedrawListener( doc ) {
     let mapData = doc.getMap("mapData");
     if ( mapData.get("changes").get("provinces").toArray().length === 1 ) {
+        //We're adjusting the provinces
         let affectedProvinces = mapData.get("changes").get("provinces").get(0);
         adjustProvinces([...new Set(affectedProvinces)]);
     }

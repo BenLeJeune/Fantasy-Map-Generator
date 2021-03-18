@@ -715,6 +715,8 @@ function editStates() {
   function applyStatesManualAssignent() {
     const cells = pack.cells, affectedStates = [], affectedProvinces = [];
 
+    //Tracking changed burgs for one big update
+    const affectedBurgs = [];
     statesBody.select("#temp").selectAll("polygon").each(function() {
       const i = +this.dataset.cell; //The cell ID
       const c = +this.dataset.state; // The cell's state
@@ -723,7 +725,7 @@ function editStates() {
       cells.state[i] = c;
       if (cells.burg[i]) {
         pack.burgs[cells.burg[i]].state = c;
-        docUpdateBurg(cells.burg[i]);
+        affectedBurgs.push( cells.burg[i] );
       }
     });
      
@@ -736,9 +738,12 @@ function editStates() {
       if (layerIsOn("toggleProvinces")) drawProvinces();
     }
     
+    if ( affectedBurgs.length >= 1 ) {
+      docUpdateBurg( affectedBurgs );
+    }
     docUpdateProvinces();
-    docUpdateCells();
     docTriggerProvinceChange( affectedProvinces )
+    docUpdateCells();
 
     exitStatesManualAssignment();
   }

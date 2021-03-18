@@ -49,6 +49,9 @@ function setupListeners( doc ) {
             let burgId = event.changes.delta[0]["retain"];
             burgListener( burgId, doc );
         }
+        else {
+            console.log( event.changes.delta );
+        }
     });
 
     //------------

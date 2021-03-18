@@ -177,7 +177,11 @@ function removeBurg(id) {
 
   const cells = pack.cells, burg = pack.burgs[id];
   burg.removed = true;
-  cells.burg[burg.cell] = 0;
+  cells.burg[burg.cell] = 0; 
+
+  //Listener
+  docUpdateCells();
+  docUpdateBurg(id)
 
   if (burg.coa) {
     const coaId = "burgCOA" + id;

@@ -481,7 +481,6 @@ function editBurg(id) {
         }
       });
     }
-    //LISTENER
   }
 
   function closeBurgEditor() {

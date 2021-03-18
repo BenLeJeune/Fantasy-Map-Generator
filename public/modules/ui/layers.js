@@ -756,6 +756,8 @@ function drawStates() {
 // draw state and province borders
 function drawBorders() {
   TIME && console.time("drawBorders");
+
+  console.time("remove paths & variables");
   borders.selectAll("path").remove();
 
   const cells = pack.cells, vertices = pack.vertices, n = cells.i.length;
@@ -763,7 +765,13 @@ function drawBorders() {
   const sUsed = new Array(pack.states.length).fill("").map(a => []);
   const pUsed = new Array(pack.provinces.length).fill("").map(a => []);
 
+  console.timeEnd("remove paths & variables")
+
+  console.time("for each");
   for (let i=0; i < cells.i.length; i++) {
+    
+    let start = performance.now();
+
     if (!cells.state[i]) continue;
     const p = cells.province[i];
     const s = cells.state[i];
@@ -782,7 +790,7 @@ function drawBorders() {
         continue;
       }
     }
-
+    
     // if cell is on state border
     const stateToCell = cells.c[i].find(n => cells.h[n] >= 20 && s > cells.state[n] && sUsed[s][n] !== cells.state[n]);
     if (stateToCell !== undefined) {
@@ -796,13 +804,24 @@ function drawBorders() {
         i--;
         continue;
       }
+    } 
+
+    let end = performance.now();
+
+    if ( end - start >= 0.1 ) {
+      console.log(`${i} took ${ end - start } ms:`, cells.province[i], cells.state[i])
     }
+
   }
+  console.log(`Looped through ${ cells.i.length } times`)
+  console.timeEnd("for each");
 
   stateBorders.append("path").attr("d", sPath.join(" "));
   provinceBorders.append("path").attr("d", pPath.join(" "));
 
   // connect vertices to chain
+
+  console.time("connect vertices");
   function connectVertices(current, f, array, t, used) {
     let chain = [];
     const checkCell = c => c >= n || array[c] !== f;
@@ -847,6 +866,7 @@ function drawBorders() {
 
     return chain;
   }
+  console.timeEnd("connect vertices");
 
   TIME && console.timeEnd("drawBorders");
 }

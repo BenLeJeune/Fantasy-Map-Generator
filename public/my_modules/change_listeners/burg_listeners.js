@@ -46,6 +46,25 @@ function burgListener( burgId , doc ) {
         }
     }
 
+    //The burg has been deleted
+    if ( newBurg.removed ) {
+        //Remove the label, icon and (if exists) anchor.
+        const label = document.querySelector("#burgLabels [data-id='" + burgId + "']");
+        const icon = document.querySelector("#burgIcons [data-id='" + burgId + "']");
+        const anchor = document.querySelector("#anchors [data-id='" + burgId + "']");
+        if (label) label.remove();
+        if (icon) icon.remove();
+        if (anchor) anchor.remove();
+
+        //Remove the coat of arms to save data
+        if ( newBurg.coa ) {
+            const coaId = "burgCOA" + burgId;
+            if (document.getElementById(coaId)) document.getElementById(coaId).remove();
+            emblems.select(`#burgEmblems > use[data-i='${burgId}']`).remove();
+            delete newBurg.coa; // remove to save data
+        }
+    }
+
     //Sync all the changes
     pack.burgs[ burgId ] = newBurg;
 }
