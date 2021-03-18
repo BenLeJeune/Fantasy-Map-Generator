@@ -5,6 +5,14 @@ const isArrayUpdate = changeDelta => { //If the update is a simple delete/insert
                 && changeDelta[2].hasOwnProperty("delete")
     }
     return false;
+};
+
+const isSingleInsertUpdate = changeDelta => {
+    if ( changeDelta.length === 2 ) {
+        return changeDelta[0].hasOwnProperty("retain")
+                && changeDelta[1].hasOwnProperty("insert");
+    }
+    return false;
 }
 
 function setupListeners( doc ) {
@@ -49,8 +57,9 @@ function setupListeners( doc ) {
             let burgId = event.changes.delta[0]["retain"];
             burgListener( burgId, doc );
         }
-        else {
-            console.log( event.changes.delta );
+        else if ( isSingleInsertUpdate( event.changes.delta ) ) {
+            let burgId = event.changes.delta[0]["retain"];
+            addBurgListener( burgId, doc );
         }
     });
 

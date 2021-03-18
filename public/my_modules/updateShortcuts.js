@@ -87,3 +87,16 @@ function docTriggerProvinceChange( affectedProvinces ) {
         provinceChanges.insert( 0, [affectedProvinces] );
     } )
 }
+
+/// ----------
+/// INSERTIONS (CREATING SOMETHING)
+/// ----------
+
+function docCreateBurg( id ) {
+    window.changeDoc( doc => {
+        let burgs = doc.getMap("mapData").get("pack").get("burgs");
+        doc.transact(() => {
+            burgs.insert( id, [ pack.burgs[id] ] );
+        })
+    } )
+}

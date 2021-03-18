@@ -141,6 +141,9 @@ function addBurg(point) {
     .attr("x", x).attr("y", y).attr("dy", `${townSize * -1.5}px`).text(name);
 
   BurgsAndStates.defineBurgFeatures(pack.burgs[i]);
+
+  docCreateBurg(i);
+  docUpdateCells();
   return i;
 }
 
