@@ -5,6 +5,25 @@ function stateListener( stateId, doc ) {
     let newState = mapStates.get(stateId);
     let currentState = pack.states[stateId];
 
+    //The state has been removed
+    if ( newState.removed ) { 
+        //Removing some stuff
+        statesBody.select("#state"+stateId).remove();
+        statesBody.select("#state-gap"+stateId).remove();
+        statesHalo.select("#state-border"+stateId).remove();
+        labels.select("#stateLabel"+stateId).remove();
+        defs.select("#textPath_stateLabel"+stateId).remove();
+
+        //Unfog
+        unfog("focusState"+stateId);
+
+        //Remove emblem
+        const coaId = "stateCOA" + stateId;
+        document.getElementById(coaId)?.remove();
+        emblems.select(`#stateEmblems > use[data-i='${stateId}']`).remove();
+        return;
+    }
+
     //Change fill color
     if ( newState.color !== currentState.color ) {
         let fill = newState.color;

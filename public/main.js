@@ -9,6 +9,27 @@ function reDefineCellFunction() {
   pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
 }
 
+function toIterable( nonIterable ) {
+  //If already iterable
+  if (typeof nonIterable[Symbol.iterator] === "function") return nonIterable;
+  try {
+    const keys = Object.keys( nonIterable );
+    const iterable = [];
+    keys.map( (key, index) => {
+      if ( parseInt(key) === index ) {
+        iterable[ index ] = nonIterable[key];
+      }
+    } )
+
+    return iterable;
+
+  }
+  catch (e) {
+    console.log("Failed to convert to iterable", e);
+    return nonIterable;
+  }
+}
+
 
 let mapLoaded = false;
 //______________________
@@ -131,10 +152,13 @@ function loadDataFromDoc( doc ) {
     cells.r = objCells.r;
     cells.road = objCells.road;
     cells.s = objCells.s;
-    cells.state = objCells.state;
+    cells.state = toIterable(objCells.state);
     cells.religion = objCells.religion;
-    cells.province = objCells.province;
+    cells.province = toIterable(objCells.province);
     cells.crossroad = objCells.crossroad;
+
+    //
+
     console.log("parsePackData:", pack.cells);  
   }()
 

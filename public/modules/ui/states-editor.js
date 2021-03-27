@@ -429,7 +429,15 @@ function editStates() {
     defs.select("#textPath_stateLabel"+state).remove();
 
     unfog("focusState"+state);
-    pack.burgs.forEach(b => {if(b.state === state) b.state = 0;});
+
+    //Get burgs that were affected
+    let affectedBurgs = [];
+    pack.burgs.forEach( b => {
+      if(b.state === state) {
+        b.state = 0;
+        affectedBurgs.push( b.i );
+      }
+    });
     pack.cells.state.forEach((s, i) => {if(s === state) pack.cells.state[i] = 0;});
 
     // remove emblem
@@ -462,6 +470,9 @@ function editStates() {
     pack.burgs[capital].state = 0;
     moveBurgToGroup(capital, "towns");
 
+    //Capital should be in here, but just in case...
+    if ( affectedBurgs.indexOf( capital ) === -1 ) affectedBurgs.push( capital );
+
     pack.states[state] = {i: state, removed: true};
 
     debug.selectAll(".highlight").remove();
@@ -469,6 +480,15 @@ function editStates() {
     if (!layerIsOn("toggleBorders")) toggleBorders(); else drawBorders();
     if (layerIsOn("toggleProvinces")) drawProvinces();
     refreshStatesEditor();
+
+  
+    docUpdateCells(); //Update cells
+    docUpdateProvinces(); //Update Provinces
+    console.log(affectedBurgs);
+    if ( affectedBurgs.length > 0 ) docUpdateBurg( affectedBurgs ); //Updates all burgs
+    docUpdateState(state);  //Update state
+
+    docTriggerLayerDraws(["states", "borders", "provinces"]);
   }
 
   function toggleLegend() {
