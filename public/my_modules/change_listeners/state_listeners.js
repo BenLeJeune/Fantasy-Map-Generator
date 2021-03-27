@@ -34,3 +34,13 @@ function stateListener( stateId, doc ) {
     }
 
 }
+
+function addStateListener( stateId, doc ) {
+    console.log("adding state " + stateId);
+
+    let states = doc.getMap("mapData").get("pack").get("states");
+    let newState = states.toArray()[stateId];
+
+    //Adding a state...
+    pack.states[stateId] = newState;
+}

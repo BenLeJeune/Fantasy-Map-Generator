@@ -88,6 +88,19 @@ function docTriggerProvinceChange( affectedProvinces ) {
     } )
 }
 
+function docTriggerLayerDraws( layers ) {
+    window.changeDoc( doc => {
+        let layerDrawChanges = doc.getMap("mapData").get("changes").get("layers");
+        try {
+            layerDrawChanges.delete(0, 1);
+        }
+        catch {
+            console.log("failed to delete, probably the first change");
+        }
+        layerDrawChanges.insert( 0, [ layers ] )
+    } )
+}
+
 /// ----------
 /// INSERTIONS (CREATING SOMETHING)
 /// ----------
@@ -98,5 +111,12 @@ function docCreateBurg( id ) {
         doc.transact(() => {
             burgs.insert( id, [ pack.burgs[id] ] );
         })
+    } )
+}
+
+function docCreateState( id ) {
+    window.changeDoc( doc => {
+        let states = doc.getMap("mapData").get("pack").get("states");
+        states.insert( id, [ pack.states[id] ] )
     } )
 }

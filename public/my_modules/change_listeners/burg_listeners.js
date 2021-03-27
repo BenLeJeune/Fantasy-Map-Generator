@@ -1,5 +1,6 @@
 function burgListener( burgId , doc ) {
 
+    console.log("Updating burg", burgId)
     let mapBurgs = doc.getMap("mapData").get("pack").get("burgs"); 
 
     let newBurg = mapBurgs.get(burgId);
@@ -58,7 +59,7 @@ function burgListener( burgId , doc ) {
     //Changing status as capital
     if ( newBurg.capital !== currentBurg.capital ) {
         //If it is becoming a capital
-        if ( newBurg.capital === 1 ) {
+        if ( newBurg.capital === 1  ) {
             //Move it to the "cities" group (make label bigger)
             moveBurgToGroup( burgId , "cities" );
         }
@@ -74,7 +75,7 @@ function burgListener( burgId , doc ) {
 }
 
 function addBurgListener( burgId, doc ) {
-    console.log("adding burg " + burgId)
+    console.log("adding burg",  burgId)
 
     let burgs = doc.getMap("mapData").get("pack").get("burgs");
     let newBurg = burgs.toArray()[ burgId ];
@@ -83,6 +84,9 @@ function addBurgListener( burgId, doc ) {
     let burgIcon = document.querySelector(`#burgIcons #towns #burg${ burgId }`);
     let burgLabel = document.querySelector(`#burgLabels #towns #burgLabel${burgId}`);
 
+    if (!burgIcon) burgIcon = document.querySelector(`#burgIcons #cities #burg${ burgId }`);
+    if (!burgLabel) burgLabel = document.querySelector(`#burgLabels #cities #burgLabel${ burgId }`);
+
     const townSize = burgIcons.select("#towns").attr("size") || 0.5;
     if (!burgIcon) burgIcons.select("#towns").append("circle").attr("id", "burg"+newBurg.i).attr("data-id", newBurg.i)
         .attr("cx", newBurg.x).attr("cy", newBurg.y).attr("r", townSize);
@@ -90,6 +94,9 @@ function addBurgListener( burgId, doc ) {
 
     if (!burgLabel) burgLabels.select("#towns").append("text").attr("id", "burgLabel"+newBurg.i).attr("data-id", newBurg.i)
         .attr("x", newBurg.x).attr("y", newBurg.y).attr("dy", `${townSize * -1.5}px`).text(newBurg.name);
+
+    //If a capital, make it big!
+    if (newBurg.capital) moveBurgToGroup( burgId, "cities" );
 
     //Also kinda important to have this
     pack.burgs[burgId] = newBurg;

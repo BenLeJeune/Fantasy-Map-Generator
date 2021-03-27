@@ -16,24 +16,4 @@ function cellListener( doc ) {
 
     //redefine cell function
     reDefineCellFunction();
-
-
-    /// -----------------
-    // THIS OCCURS AFTER STATE/PROVINCE REDRAWING
-    /// -----------------
-
-    let provinceChanges = doc.getMap("mapData").get("changes").get("provinces");
-    if ( provinceChanges.toArray().length === 1 ) {
-        ///THIS MEANS WE WANT TO REDRAW AND STUFF
-        BurgsAndStates.drawStateLabels();
-        if (layerIsOn("toggleStates")) drawStates();
-        if (layerIsOn("toggleBorders")) drawBorders();
-        if (layerIsOn("toggleProvinces")) drawProvinces();
-        window.changeDoc( doc => {
-            doc.transact(() => {
-                provinceChanges.delete(0, 1);
-            })
-        } )
-    }
-
 }

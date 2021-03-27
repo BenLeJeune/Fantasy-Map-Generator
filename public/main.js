@@ -191,7 +191,8 @@ function saveDataToDoc( doc ) {
   let changesTemplate = {
     heightmap: [],
     states: [],
-    provinces: []
+    provinces: [],
+    layers: []
   };
   let changesMap = window.shallowObjectToMap( changesTemplate )
   mapData.set("changes", changesMap );

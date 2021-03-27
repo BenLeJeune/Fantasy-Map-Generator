@@ -1,18 +1,18 @@
 function StateRedrawListener( doc, event ) {
     let mapData = doc.getMap("mapData");
-    if ( mapData.get("changes").get("states").toArray().length === 2 ) {
-        console.log("Redrawing states...")
+    if ( mapData.get("changes").get("states").toArray().length === 1 ) {
 
         let affectedStates = mapData.get("changes").get("states").get(0);
-        let affectedProvinces = mapData.get("changes").get("states").get(1);
+        BurgsAndStates.drawStateLabels([...new Set( affectedStates )]);
 
-        if ( affectedStates.length ) {
-            if ( !layerIsOn("toggleStates")) toggleStates(); else drawStates();
-            BurgsAndStates.drawStateLabels([...new Set( affectedStates )]);
-            adjustProvinces([...new Set(affectedProvinces)]);
-            drawBorders();
-            if (layerIsOn("toggleProvinces")) drawProvinces();
-        }
+        // let affectedStates = mapData.get("changes").get("states").get(0);
+        // if ( affectedStates.length ) {
+        //     if ( !layerIsOn("toggleStates")) toggleStates(); else drawStates();
+        //     BurgsAndStates.drawStateLabels([...new Set( affectedStates )]);
+        //     adjustProvinces([...new Set(affectedProvinces)]);
+        //     drawBorders();
+        //     if (layerIsOn("toggleProvinces")) drawProvinces();
+        // }
     }
 }
 
@@ -80,6 +80,24 @@ function provinceRedrawListener( doc ) {
         //We're adjusting the provinces
         let affectedProvinces = mapData.get("changes").get("provinces").get(0);
         adjustProvinces([...new Set(affectedProvinces)]);
+    }
+}
+
+function layerRedrawListener( doc ) {
+    let mapData = doc.getMap("mapData");
+    if ( mapData.get("changes").get("layers").toArray().length === 1 ) {
+        //Let's redraw some stuff
+        let layers = mapData.get("changes").get("layers").get(0);
+        console.log(layers.indexOf("provinces"), layers.indexOf("states"), layers.indexOf("borders"));
+        if ( layers.indexOf("provinces") >= 0 ) {
+            if (layerIsOn("toggleProvinces")) drawProvinces();
+        }
+        if ( layers.indexOf("states") >= 0 ) {
+            if (!layerIsOn("toggleStates")) toggleStates(); else drawStates();
+        }
+        if ( layers.indexOf("borders") >= 0 ) {
+            if (!layerIsOn("toggleBorders")) toggleBorders(); else drawBorders();
+        }
     }
 }
  

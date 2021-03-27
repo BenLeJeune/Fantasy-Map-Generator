@@ -36,6 +36,10 @@ function setupListeners( doc ) {
             let stateId = event.changes.delta[0].retain;
             stateListener( stateId, doc );
         }
+        else if ( isSingleInsertUpdate( event.changes.delta ) ) {
+            let stateId = event.changes.delta[0]["retain"];
+            addStateListener( stateId, doc );
+        }
     } )
 
     //--------------
@@ -82,6 +86,11 @@ function setupListeners( doc ) {
         console.log("changing provinces");
         provinceRedrawListener( doc );
     })
+
+    changes.get("layers").observe( () => {
+        console.log("changing layers");
+        layerRedrawListener( doc );
+    } )
 
 
     mapLoaded = true;

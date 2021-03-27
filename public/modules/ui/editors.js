@@ -112,7 +112,7 @@ function applySorting(headers) {
   }).forEach(line => list.appendChild(line));
 }
 
-function addBurg(point) {
+function addBurg(point, autoUpdate = true) {
   const cells = pack.cells;
   const x = rn(point[0], 2), y = rn(point[1], 2);
   const cell = findCell(x, point[1]);
@@ -142,8 +142,10 @@ function addBurg(point) {
 
   BurgsAndStates.defineBurgFeatures(pack.burgs[i]);
 
-  docCreateBurg(i);
-  docUpdateCells();
+  if ( autoUpdate) {
+    docCreateBurg(i);
+    docUpdateCells();
+  }
   return i;
 }
 

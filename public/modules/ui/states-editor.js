@@ -741,10 +741,12 @@ function editStates() {
     if ( affectedBurgs.length >= 1 ) {
       docUpdateBurg( affectedBurgs );
     }
-    docUpdateProvinces();
-    docTriggerProvinceChange( affectedProvinces )
-    docUpdateCells();
 
+    docUpdateProvinces();
+    docUpdateCells();
+    docTriggerStateChange( affectedStates );
+    docTriggerProvinceChange( affectedProvinces );
+    docTriggerLayerDraws([ "states", "borders", "provinces" ])
     exitStatesManualAssignment();
   }
 
@@ -838,10 +840,14 @@ function editStates() {
     const states = pack.states, burgs = pack.burgs, cells = pack.cells;
     const point = d3.mouse(this);
     const center = findCell(point[0], point[1]);
+    let createdNewBurg = false; //tracks if burg was created
     if (cells.h[center] < 20) {tip("You cannot place state into the water. Please click on a land cell", false, "error"); return;}
     let burg = cells.burg[center];
     if (burg && burgs[burg].capital) {tip("Existing capital cannot be selected as a new state capital! Select other cell", false, "error"); return;}
-    if (!burg) burg = addBurg(point); // add new burg
+    if (!burg) {
+      burg = addBurg(point, false); // add new burg
+      createdNewBurg = true;
+    }
 
     const oldState = cells.state[center];
     const newState = states.length;
@@ -912,6 +918,20 @@ function editStates() {
     BurgsAndStates.drawStateLabels([...new Set(affectedStates)]);
     COArenderer.add("state", newState, coa, states[newState].pole[0], states[newState].pole[1]);
     statesEditorAddLines();
+
+    console.log("reached listeners");
+
+    //Some
+    if ( createdNewBurg ) docCreateBurg( burg );  
+    docCreateState( newState );
+    docUpdateProvinces();
+    docUpdateCells();
+    docUpdateBurg(burg);
+
+    docTriggerProvinceChange( affectedProvinces );
+    docTriggerStateChange( affectedStates );
+    docTriggerLayerDraws(["states", "borders", "provinces"]);
+    //Listeners
   }
 
   function exitAddStateMode() {
