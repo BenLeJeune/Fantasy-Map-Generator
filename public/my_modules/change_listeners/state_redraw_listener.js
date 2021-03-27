@@ -88,15 +88,14 @@ function layerRedrawListener( doc ) {
     if ( mapData.get("changes").get("layers").toArray().length === 1 ) {
         //Let's redraw some stuff
         let layers = mapData.get("changes").get("layers").get(0);
-        console.log(layers.indexOf("provinces"), layers.indexOf("states"), layers.indexOf("borders"));
         if ( layers.indexOf("provinces") >= 0 ) {
             if (layerIsOn("toggleProvinces")) drawProvinces();
         }
         if ( layers.indexOf("states") >= 0 ) {
-            if (!layerIsOn("toggleStates")) toggleStates(); else drawStates();
+            if (layerIsOn("toggleStates")) drawStates();
         }
         if ( layers.indexOf("borders") >= 0 ) {
-            if (!layerIsOn("toggleBorders")) toggleBorders(); else drawBorders();
+            if (layerIsOn("toggleBorders")) drawBorders();
         }
     }
 }

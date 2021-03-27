@@ -93,3 +93,18 @@ window.shallowObjectToMap = object => {
     }
     return map;
 }
+
+///
+/// CONVERTS AN ARRAY TO A Y.ARRAY
+///
+
+window.toSharedArray = array => {
+    console.log("Converting to shared array");
+    if ( !Array.isArray(array) ) {
+        console.log("TRYING TO CONVERT A NON-ARRAY TO A Y-ARRAY");
+        return;
+    }
+    let sharedArray = new Y.Array();
+    sharedArray.push( array );
+    return sharedArray;
+}

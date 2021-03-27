@@ -43,13 +43,37 @@ function setupListeners( doc ) {
     } )
 
     //--------------
+    // PROVINCES
+    //-------------
+    function addProvinceObserver() {
+        let mapProvinces = mapPack.get("provinces");
+        mapProvinces.observe( event => {
+            console.log("province update");
+            if ( isArrayUpdate( event.changes.delta ) ) {
+                let provinceId = event.changes.delta[0].retain;
+                updateProvinceListener( provinceId, doc );
+            }
+            else if ( isSingleInsertUpdate( event.changes.delta ) ) {
+                let provinceId = event.changes.delta[0].retain;
+                console.log("Adding province", provinceId)
+                addProvinceListener( provinceId, doc );
+            }
+        } )
+        console.log("Added provinces observer!");
+    }
+    addProvinceObserver();
+
+    //--------------
     // CELLS, PROVINCES, OTHER PACK CHANGES
     //--------------
     mapPack.observe( event => {
         console.log("mapPack event:", event);
         if ( event.hasOwnProperty("keysChanged") ) {
             if ( event.keysChanged.has("cells") ) cellListener(doc); //We're updating the cells
-            if ( event.keysChanged.has("provinces") ) provinceListener(doc); //We're updating the provinces
+            if ( event.keysChanged.has("provinces") ) {
+                provinceListener(doc); //We're updating the provinces
+                addProvinceObserver()
+            }
         }
     } )
 
@@ -95,9 +119,4 @@ function setupListeners( doc ) {
 
     mapLoaded = true;
 
-}
-
-//REDRAWING STUFF
-function postStatesManualAssignment(affectedStates, affectedProvinces) {
-    
 }

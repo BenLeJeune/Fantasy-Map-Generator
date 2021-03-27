@@ -38,7 +38,10 @@ function docUpdateProvinces() {
     window.changeDoc( doc => {
         let mapPack = doc.getMap("mapData").get("pack");
         doc.transact(() => {
-            mapPack.set("provinces", pack.provinces);
+            let provinces = pack.provinces;
+            let mapProvinces = window.toSharedArray(provinces);
+            console.log("MapProvinces ->", mapProvinces);
+            mapPack.set("provinces", mapProvinces);
         })
     } )
 }
@@ -49,6 +52,16 @@ function docUpdateState(state) {
         doc.transact(() => {
             states.delete( state, 1 );
             states.insert( state, [ pack.states[state] ] )
+        })
+    } )
+}
+
+function docUpdateProvince(province) {
+    window.changeDoc( doc => {
+        let provinces = doc.getMap("mapData").get("pack").get("provinces");
+        doc.transact(() => {
+            provinces.delete( province, 1 );
+            provinces.insert( province, [ pack.provinces[province] ] );
         })
     } )
 }
@@ -118,5 +131,13 @@ function docCreateState( id ) {
     window.changeDoc( doc => {
         let states = doc.getMap("mapData").get("pack").get("states");
         states.insert( id, [ pack.states[id] ] )
+    } )
+}
+
+function docCreateProvince( id ) {
+    console.log("Creating province", id)
+    window.changeDoc( doc => {
+        let provinces = doc.getMap("mapData").get("pack").get("provinces");
+        provinces.insert( id, [ pack.provinces[id] ] );
     } )
 }

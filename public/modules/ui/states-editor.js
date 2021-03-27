@@ -764,8 +764,8 @@ function editStates() {
 
     docUpdateProvinces();
     docUpdateCells();
-    docTriggerStateChange( affectedStates );
-    docTriggerProvinceChange( affectedProvinces );
+    docTriggerStateChange( affectedStates ); //draw burg/state labels
+    docTriggerProvinceChange( affectedProvinces ); //adjust provinces
     docTriggerLayerDraws([ "states", "borders", "provinces" ])
     exitStatesManualAssignment();
   }

@@ -188,6 +188,9 @@ function editProvinces() {
       const g = provs.select("#provincesBody");
       g.select("#province"+p).attr("fill", fill);
       g.select("#province-gap"+p).attr("stroke", fill);
+
+      //Listeners
+      docUpdateProvince( p );
     }
 
     openPicker(currentFill, callback);
@@ -440,6 +443,9 @@ function editProvinces() {
       p.formName = document.getElementById("provinceNameEditorSelectForm").value;
       p.fullName = document.getElementById("provinceNameEditorFull").value;
       provs.select("#provinceLabel"+p.i).text(p.name);
+
+      docUpdateProvince(p.i);
+
       refreshProvincesEditor();
     }
   }
@@ -711,6 +717,11 @@ function editProvinces() {
 
     if (!layerIsOn("toggleBorders")) toggleBorders(); else drawBorders();
     if (!layerIsOn("toggleProvinces")) toggleProvinces(); else drawProvinces();
+
+    docUpdateProvinces();
+    docUpdateCells();
+    docTriggerLayerDraws([ "states", "borders", "provinces" ]);
+
     exitProvincesManualAssignment();
     refreshProvincesEditor();
   }
@@ -793,6 +804,10 @@ function editProvinces() {
     if (!layerIsOn("toggleProvinces")) toggleProvinces(); else drawProvinces();
     collectStatistics();
     document.getElementById("provincesFilterState").value = state;
+
+    docCreateProvince(province);
+    docUpdateCells();
+    docTriggerLayerDraws(["borders", "provinces"]);
     provincesEditorAddLines();
   }
 
