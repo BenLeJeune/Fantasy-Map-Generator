@@ -9,7 +9,8 @@ function editHeightmap() {
       <p>You can <i>keep</i> the data, but you won't be able to change the coastline.</p>
       <p>Try <i>risk</i> mode to change the coastline and keep the data. The data will be restored as much as possible, but it can cause unpredictable errors.</p>
       <p>Please <span class="pseudoLink" onclick=saveMap(); editHeightmap();>save the map</span> before editing the heightmap!</p>
-      <p>Check out ${link("https://github.com/Azgaar/Fantasy-Map-Generator/wiki/Heightmap-customization", "wiki")} for guidance.</p>`;
+      <p>Check out ${link("https://github.com/Azgaar/Fantasy-Map-Generator/wiki/Heightmap-customization", "wiki")} for guidance.</p>
+      <p class="highPriorityAlert">I THINK THIS WORKS BUT I MAKE NO GUARANTEES. SAVE AND LET OTHER PEOPLE KNOW BEFORE YOU DO THIS.<p>`;
 
     $("#alert").dialog({resizable: false, title: "Edit Heightmap", width: "28em",
       buttons: {
