@@ -24,6 +24,19 @@ function updateProvinceListener( provinceId, doc ) {
     let newProvince = mapProvinces.get(provinceId);
     let oldProvince = pack.provinces[provinceId];
 
+    //If the province has been removed
+    if ( newProvince.removed ) { 
+        unfog("focusProvince"+provinceId);
+
+        const coaId = "provinceCOA" + provinceId;
+        if (document.getElementById(coaId)) document.getElementById(coaId).remove();
+        emblems.select(`#provinceEmblems > use[data-i='${provinceId}']`).remove();
+
+        const g = provs.select("#provincesBody");
+        g.select("#province"+provinceId).remove();
+        g.select("#province-gap"+provinceId).remove();
+    }
+
     //If the name has been changed...
     if ( newProvince.name !== oldProvince.name ) {
         //Update the name

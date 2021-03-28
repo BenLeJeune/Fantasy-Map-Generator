@@ -374,6 +374,13 @@ function editProvinces() {
           g.select("#province"+p).remove();
           g.select("#province-gap"+p).remove();
           if (!layerIsOn("toggleBorders")) toggleBorders(); else drawBorders();
+
+          //Update province
+          docUpdateProvince(p);
+          docUpdateState(s);
+          docUpdateCells();
+          docTriggerLayerDraws(["borders"]);
+
           refreshProvincesEditor();
           $(this).dialog("close");
         },
