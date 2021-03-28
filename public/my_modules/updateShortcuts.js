@@ -66,11 +66,32 @@ function docUpdateProvince(province) {
     } )
 }
 
+function docUpdateNote(note) {
+    window.changeDoc( doc => {
+        let sharedNotes = doc.getMap("mapData").get("notes");
+        let index = notes.indexOf( notes.find( item => item.id === note ) );
+        console.log("Updating note index", index);
+        doc.transact(() => {
+            sharedNotes.delete( index, 1 );
+            sharedNotes.insert( index, [ notes[index] ] );
+        })
+    } )
+}
+
 /// ----------
 /// DELETIONS
 /// ----------
 
 //Burg deletions can be accomplished by updating (they aren't truly "removed")
+
+function docRemoveNote( noteIndex ) {
+    window.changeDoc( doc => {
+        doc.transact(() => {
+            let mapNotes = doc.getMap("mapData").get("notes");
+            mapNotes.delete( noteIndex, 1 );
+        })
+    } )
+}
 
 /// ----------
 /// TRIGGER REDRAWS WHEN "PAINTING"
@@ -152,5 +173,12 @@ function docCreateProvince( id ) {
     window.changeDoc( doc => {
         let provinces = doc.getMap("mapData").get("pack").get("provinces");
         provinces.insert( id, [ pack.provinces[id] ] );
+    } )
+}
+
+function docCreateNote( id ) {
+    window.changeDoc( doc => {
+        let sharedNotes = doc.getMap("mapData").get("notes");
+        sharedNotes.insert( notes.length - 1, [ notes.find( item => item.id === id ) ] )
     } )
 }

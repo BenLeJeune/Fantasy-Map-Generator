@@ -125,6 +125,26 @@ function setupListeners( doc ) {
         layerRedrawListener( doc );
     } )
 
+    //----------
+    // NOTES
+    //----------
+    let notes = mapData.get("notes");
+    notes.observe( event => {
+        if ( isArrayUpdate(event.changes.delta) ) {
+            //Element being updated
+            let noteId = event.changes.delta[0].retain;
+            noteListener( noteId, doc );
+        }
+        else if ( isSingleInsertUpdate(event.changes.delta) ) {
+            let noteId = event.changes.delta[0].retain;
+            addNoteListener( noteId, doc );
+        }
+        else {
+            let noteIndex = event.changes.delta[0].retain;
+            deleteNoteListener( noteIndex, doc );
+        }
+    } )
+
 
     mapLoaded = true;
 

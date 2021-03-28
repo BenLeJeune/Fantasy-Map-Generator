@@ -169,6 +169,12 @@ function loadDataFromDoc( doc, firstTimeSetup = true ) {
     regenerateFromState();
   }();
 
+  void function restoreNotes() {
+    //NOTES
+    notes = mapData.get("notes").toArray();
+    console.log( mapData.get("notes").toArray() );
+  }()
+
   if ( firstTimeSetup ) void function restoreEvents() {
     ruler.selectAll("g").call(d3.drag().on("start", dragRuler));
     ruler.selectAll("text").on("click", removeParent);
@@ -199,12 +205,15 @@ function saveDataToDoc( doc, setupChangeArrays = true ) {
   let packMap = window.shallowObjectToMap( safePackCopy );
   mapData.set("pack", packMap);
 
+  //Saving Notes
+  let sharedNotes = window.toSharedArray(notes);
+  mapData.set("notes", sharedNotes);
+
   //Rest of the data
   mapData.set("seed", seed);
   mapData.set("mapId", mapId);
   mapData.set("mapHistory", mapHistory);
   mapData.set("modules", modules);
-  mapData.set("notes", notes);
 
   //Sets map size
   mapData.set("graphSize", { width: graphWidth, height: graphHeight })

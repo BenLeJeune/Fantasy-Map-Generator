@@ -13,6 +13,8 @@ function editNotes(id, name) {
       const note = notes.find(note => note.id === id);
       if (!note) return;
       note.legend = html;
+      //UPDATE NOTE - LISTENER
+      docUpdateNote( id );
       showNote(note);
     }
   });
@@ -26,6 +28,8 @@ function editNotes(id, name) {
       note = {id, name, legend: ""};
       notes.push(note);
       select.options.add(new Option(id, id));
+      //NEW NOTE - LISTENER
+      docCreateNote( id );
     }
     select.value = id;
     notesName.value = note.name;
@@ -75,6 +79,9 @@ function editNotes(id, name) {
     const note = notes.find(note => note.id === id);
     if (!note) return;
     note.name = this.value;
+    //LISTENER
+    docUpdateNote( id );
+
     showNote(note);
   }
 
@@ -125,6 +132,9 @@ function editNotes(id, name) {
     const index = notes.findIndex(n => n.id === select.value);
     notes.splice(index, 1);
     select.options.length = 0;
+
+    docRemoveNote( index );
+
     if (!notes.length) {$("#notesEditor").dialog("close"); return;}
     notesText.innerHTML = "";
     editNotes(notes[0].id, notes[0].name);
