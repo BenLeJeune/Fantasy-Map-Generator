@@ -2,3 +2,12 @@ p.highPriorityAlert {
     font-weight: bold;
     color: red;
 }
+
+p.highPriorityAlertDark {
+    font-weight: bold;
+    color: rgb(92, 27, 27);
+}
+
+.supportedFeature {
+    background-color: rgb(29, 110, 106) !important;
+}
