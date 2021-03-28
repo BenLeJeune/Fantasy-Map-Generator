@@ -5,12 +5,14 @@ function editHeightmap() {
   void function selectEditMode() {
     alertMessage.innerHTML = `Heightmap is a core element on which all other data (rivers, burgs, states etc) is based.
       So the best edit approach is to <i>erase</i> the secondary data and let the system automatically regenerate it on edit completion.
-      <p><i>Erase</i> mode also allows you Convert an Image into a heightmap or use Template Editor.</p>
+      <p><i>Erase</i> mode also allows you Convert an Image into a heightmap or use Template Editor. <span class="highPriorityAlert">DO NOT DO THIS UNLESS EVERYONE AGREES.<span></p>
       <p>You can <i>keep</i> the data, but you won't be able to change the coastline.</p>
-      <p>Try <i>risk</i> mode to change the coastline and keep the data. The data will be restored as much as possible, but it can cause unpredictable errors.</p>
-      <p>Please <span class="pseudoLink" onclick=saveMap(); editHeightmap();>save the map</span> before editing the heightmap!</p>
+      <h3>For making changes in a shared map:</h3>
+      <p>Try <i>risk</i> mode to change the coastline and keep the data. The data will be restored as much as possible, but it can cause unpredictable errors.
+      <span class="highPriorityAlert">This can disrupt other's work. Avoid making significant changes to already developed areas.</span></p>
+      <p>Please FOR THE LOVE OF GOD <span class="pseudoLink" onclick=saveMap(); editHeightmap();>save the map</span> before editing the heightmap!</p>
       <p>Check out ${link("https://github.com/Azgaar/Fantasy-Map-Generator/wiki/Heightmap-customization", "wiki")} for guidance.</p>
-      <p class="highPriorityAlert">I THINK THIS WORKS BUT I MAKE NO GUARANTEES. SAVE AND LET OTHER PEOPLE KNOW BEFORE YOU DO THIS.<p>`;
+      <p class="highPriorityAlert">Collaborative heightmap edits are not currently supported. Let others know when you're about to make a change.<p>`;
 
     $("#alert").dialog({resizable: false, title: "Edit Heightmap", width: "28em",
       buttons: {
@@ -216,6 +218,7 @@ function editHeightmap() {
   }
 
   function restoreRiskedData() {
+    //This should probably be the most common one;
     INFO && console.group("Edit Heightmap");
     TIME && console.time("restoreRiskedData");
 
@@ -399,6 +402,14 @@ function editHeightmap() {
 
     TIME && console.timeEnd("restoreRiskedData");
     INFO && console.groupEnd("Edit Heightmap");
+
+    //LISTENERS AND STUFF CAN GO HERE
+    window.changeDoc( doc => {
+      doc.transact(() => {
+        saveDataToDoc(doc, false);
+        docTriggerHeightmapChanges();
+      })
+    } )
   }
 
   // trigger heightmap redraw and history update if at least 1 cell is changed

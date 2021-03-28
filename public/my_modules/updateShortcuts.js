@@ -101,6 +101,19 @@ function docTriggerProvinceChange( affectedProvinces ) {
     } )
 }
 
+function docTriggerHeightmapChanges() {
+    window.changeDoc( doc => {
+        let heightmapChanges = doc.getMap("mapData").get("changes").get("heightmap");
+        try {
+            heightmapChanges.delete(0, 1);
+        }
+        catch {
+            console.log("failed to delete, probably first heightmap change");
+        }
+        heightmapChanges.insert( 0, [doc.clientID] );
+    } )
+}
+
 function docTriggerLayerDraws( layers ) {
     window.changeDoc( doc => {
         let layerDrawChanges = doc.getMap("mapData").get("changes").get("layers");

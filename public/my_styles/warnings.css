@@ -1,4 +1,4 @@
-p.highPriorityAlert {
+p.highPriorityAlert, span.highPriorityAlert {
     font-weight: bold;
     color: red;
 }

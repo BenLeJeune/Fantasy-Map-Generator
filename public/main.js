@@ -34,7 +34,7 @@ function toIterable( nonIterable ) {
 let mapLoaded = false;
 //______________________
 // LOADING & SAVING DATA
-function loadDataFromDoc( doc ) {
+function loadDataFromDoc( doc, firstTimeSetup = true ) {
   console.log("Loading Data From Doc");
   let mapData = doc.getMap("mapData");
   console.log(mapData.toJSON());
@@ -169,7 +169,7 @@ function loadDataFromDoc( doc ) {
     regenerateFromState();
   }();
 
-  void function restoreEvents() {
+  if ( firstTimeSetup ) void function restoreEvents() {
     ruler.selectAll("g").call(d3.drag().on("start", dragRuler));
     ruler.selectAll("text").on("click", removeParent);
     ruler.selectAll("g.ruler circle").call(d3.drag().on("drag", dragRulerEdge));
@@ -183,10 +183,10 @@ function loadDataFromDoc( doc ) {
   }()
 
   if (window.restoreDefaultEvents) restoreDefaultEvents();
-  invokeActiveZooming();
+  if (firstTimeSetup) invokeActiveZooming();
 }
 
-function saveDataToDoc( doc ) {
+function saveDataToDoc( doc, setupChangeArrays = true ) {
   console.log("saving");
   let mapData = doc.getMap("mapData");
   //Saving grid data
@@ -206,8 +206,6 @@ function saveDataToDoc( doc ) {
   mapData.set("modules", modules);
   mapData.set("notes", notes);
 
-  //Share the innerHTML for setup?
-
   //Sets map size
   mapData.set("graphSize", { width: graphWidth, height: graphHeight })
 
@@ -218,8 +216,10 @@ function saveDataToDoc( doc ) {
     provinces: [],
     layers: []
   };
-  let changesMap = window.shallowObjectToMap( changesTemplate )
-  mapData.set("changes", changesMap );
+  if (setupChangeArrays) {
+    let changesMap = window.shallowObjectToMap( changesTemplate )
+    mapData.set("changes", changesMap );
+  }
 }
 
 // Switches to disable/enable logging features

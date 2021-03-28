@@ -98,6 +98,15 @@ function setupListeners( doc ) {
     
     changes.get("heightmap").observe( event => {
         console.log("changing heightmap"); 
+        let sourceClient = changes.get("heightmap").get(0);
+        console.log(sourceClient);
+        if ( sourceClient === doc.clientID ) {
+            console.log("A change made by us! Don't do anything");
+        }
+        else {
+            console.log("Someone else changed the heightmap!");
+            loadDataFromDoc(doc, false);
+        }
     } );
 
     changes.get("states").observe( event => {
