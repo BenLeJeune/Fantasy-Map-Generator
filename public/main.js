@@ -10,8 +10,8 @@ const newMarker = ( id, group, x, y, size ) => {
   return { id, group, x, y, size }
 };
 
-const newMarkerGroup = ( name, text ) => {
-  return { name, text }
+const newMarkerGroup = ( id, icon, size, icon_x, icon_y ) => {
+  return { id, icon, size, icon_x, icon_y }
 }
 
 function reDefineCellFunction() {
@@ -178,6 +178,39 @@ function loadDataFromDoc( doc, firstTimeSetup = true ) {
     regenerateFromState();
   }();
 
+  void function restoreMarkers() {
+    //Time to restore markers pog
+    let docMarkers = mapData.get("markers").toArray();
+    let docMarkerGroups = mapData.get("markerGroups").toArray();
+
+    for ( let marker of docMarkers ) {
+      //For each marker, we basically use appendMarker()
+      let { id, group, x, y, size } = marker;
+      markers.append("use").attr("id", id)
+        .attr("xlink:href", group).attr("data-id", group)
+        .attr("data-x", x).attr("data-y", y)
+        .attr("x", x - 15).attr("y", y - 15)
+        .attr("data-size", size).attr("width", 30).attr("height", 30); //Revisit this to make sure its all good
+    };
+
+    for ( let markerGroup of docMarkerGroups ) {
+      let { id, icon, size, icon_x, icon_y } = markerGroup;
+      //For each marker group, basically use addMarker();
+      const markers = svg.select("#defs-markers");
+      //The symbol
+      const symbol = markers.append("symbol").attr("id", id)
+        .attr("viewBox", "0 0 30 30");
+      //The path  
+      symbol.append("path").attr("d", "M6,19 l9,10 L24,19").attr("fill", "#000000").attr("stroke", "none");
+      //The circle
+      symbol.append("circle").attr("cx", 15).attr("cy", 15).attr("r", 10).attr("fill", "#ffffff").attr("stroke", "#000000").attr("stroke-width", 1);
+      //The text/icon
+      symbol.append("text").attr("x", icon_x+"%").attr("y", icon_y+"%").attr("fill", "#000000").attr("stroke", "#3200ff").attr("stroke-width", 0)
+        .attr("font-size", size+"px").attr("dominant-baseline", "central").text(icon);
+    }
+
+  }()
+
   void function restoreNotes() {
     //NOTES
     notes = mapData.get("notes").toArray();
@@ -245,9 +278,13 @@ function saveDataToDoc( doc, setupChangeArrays = true ) {
     };
 
     for ( let markerGroup of markerGroups ) {
+      let markerText = markerGroup.querySelector("text");
       const id = markerGroup.id;
-      const icon = markerGroup.querySelector("text").innerHTML;
-      const parsedMarkerGroup = newMarkerGroup( id, icon );
+      const icon = markerText.innerHTML;
+      const size = markerText.getAttribute("font-size").replace("px", "");
+      const icon_x = markerText.getAttribute("x").replace("%", "");
+      const icon_y = markerText.getAttribute("y").replace("%", "");
+      const parsedMarkerGroup = newMarkerGroup( id, icon, size, icon_x, icon_y );
       markerGroupsArray.push( parsedMarkerGroup )
     }
     
