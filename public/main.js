@@ -5,6 +5,15 @@
 const version = "1.5"; // generator version
 document.title += " v" + version;
 
+//For standardising the marker data structure
+const newMarker = ( id, group, x, y, size ) => { 
+  return { id, group, x, y, size }
+};
+
+const newMarkerGroup = ( name, text ) => {
+  return { name, text }
+}
+
 function reDefineCellFunction() {
   pack.cells.q = d3.quadtree(pack.cells.p.map((p, d) => [p[0], p[1], d])); //re-initialising the function
 }
@@ -214,6 +223,41 @@ function saveDataToDoc( doc, setupChangeArrays = true ) {
   mapData.set("mapId", mapId);
   mapData.set("mapHistory", mapHistory);
   mapData.set("modules", modules);
+
+  //This is used to sync markers - which aren't usually saved in the pack
+  void function SaveMarkersToDoc() {
+    let markersArray = [];
+    let markerGroupsArray = [];
+    //Markerdefs - where info about styles is stored
+    //Markers - where the actual marker icons themselves are stored
+    let markerGroups = d3.select("#defs-markers").selectAll("symbol").nodes();
+    let currentMarkers = markers.selectAll("use").nodes();
+
+    //Loops through all the markers
+    for (let marker of currentMarkers) {
+      const id = marker.id;
+      const group = marker.getAttribute("data-id");
+      const x = marker.getAttribute("data-x");
+      const y = marker.getAttribute("data-y");
+      const size = marker.getAttribute("data-size");
+      const parsedMarker = newMarker(id, group, x, y, size);
+      markersArray.push( parsedMarker );
+    };
+
+    for ( let markerGroup of markerGroups ) {
+      const id = markerGroup.id;
+      const icon = markerGroup.querySelector("text").innerHTML;
+      const parsedMarkerGroup = newMarkerGroup( id, icon );
+      markerGroupsArray.push( parsedMarkerGroup )
+    }
+    
+    let sharedMarkers = window.toSharedArray( markersArray );
+    let sharedMarkerGroups = window.toSharedArray( markerGroupsArray );
+    
+    mapData.set("markers", sharedMarkers);
+    mapData.set("markerGroups", sharedMarkerGroups);
+
+  }()
 
   //Sets map size
   mapData.set("graphSize", { width: graphWidth, height: graphHeight })
@@ -1614,7 +1658,7 @@ function addMarkers(number = 1) {
     }
   }()
 
-  function addMarker(id, icon, x, y, size) {
+  function addMarker(id, icon, x, y, size) { //Adds a def for a group of markers
     const markers = svg.select("#defs-markers");
     if (markers.select("#marker_"+id).size()) return;
 
@@ -1625,7 +1669,7 @@ function addMarkers(number = 1) {
       .attr("font-size", size+"px").attr("dominant-baseline", "central").text(icon);
   }
 
-  function appendMarker(cell, type) {
+  function appendMarker(cell, type) { //Actually adds the marker itself
     const x = cells.p[cell][0], y = cells.p[cell][1];
     const id = getNextId("markerElement");
     const name = "#marker_" + type;
